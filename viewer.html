@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Просмотр лекции — ЭУМК «Веб-программирование на стороне сервера»</title>
+  <link rel="icon" type="image/png" href="img/logo-pgktit.png">
+  <link rel="stylesheet" href="css/style.css?v=3">
+  <style>
+
+    /* =========================================================
+       VIEWER — стили поверх style.css.
+       «Бумага» следует теме и режиму для слабовидящих.
+       ========================================================= */
+
+    :root {
+      --paper: #ffffff;
+      --paper-ink: #000000;
+      --paper-soft: #f0f0f0;
+      --paper-pre: #f5f5f5;
+      --paper-line: #cccccc;
+      --paper-border: #dddddd;
+      --paper-link: #0066cc;
+      --paper-quote-bg: #f0f4fa;
+      --paper-quote-border: #0066cc;
+      --paper-sub: #666666;
+      --paper-error: #c00000;
+    }
+    body.theme-dark {
+      --paper: #1b2342;
+      --paper-ink: #e9ecf8;
+      --paper-soft: #232c56;
+      --paper-pre: #131a35;
+      --paper-line: #2c3560;
+      --paper-border: #2c3560;
+      --paper-link: #8fd3ff;
+      --paper-quote-bg: #16224a;
+      --paper-quote-border: #2ec9c2;
+      --paper-sub: #a3aac8;
+      --paper-error: #ff8a8a;
+    }
+    body.a11y {
+      --paper: #000000;
+      --paper-ink: #ffe600;
+      --paper-soft: #000000;
+      --paper-pre: #000000;
+      --paper-line: #ffe600;
+      --paper-border: #ffe600;
+      --paper-link: #ffe600;
+      --paper-quote-bg: #000000;
+      --paper-quote-border: #ffe600;
+      --paper-sub: #ffe600;
+      --paper-error: #ffe600;
+    }
+
+    /* Страница-обёртка лекции — «бумага» по теме */
+    .viewer-page {
+      max-width: 900px;
+      margin: 32px auto 48px;
+      background: var(--paper);
+      color: var(--paper-ink);
+      box-shadow: 0 4px 32px rgba(0,0,0,.18);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    body.theme-dark .viewer-page { box-shadow: 0 4px 40px rgba(0,0,0,.55); }
+    body.a11y .viewer-page { border: 3px solid #ffe600; }
+
+    /* Содержимое лекции — word-like */
+    .viewer-content {
+      padding: 72px 72px 96px;
+      font-family: "Times New Roman", Georgia, serif;
+      font-size: 12pt;
+      line-height: 1.5;
+      color: var(--paper-ink);
+      background: var(--paper);
+    }
+
+    /* Типографика внутри лекции */
+    .viewer-content p       { margin: 0 0 10pt; }
+    .viewer-content h1,
+    .viewer-content h2,
+    .viewer-content h3,
+    .viewer-content h4,
+    .viewer-content h5,
+    .viewer-content h6      { color: var(--paper-ink); font-weight: 700; }
+    .viewer-content h1      { font-size: 28pt; margin: 24pt 0 12pt; }
+    .viewer-content h2      { font-size: 22pt; margin: 24pt 0 12pt; }
+    .viewer-content h3      { font-size: 18pt; margin: 18pt 0 10pt; }
+    .viewer-content h4      { font-size: 14pt; margin: 16pt 0 8pt;  }
+    .viewer-content h5      { font-size: 12pt; margin: 14pt 0 7pt;  }
+    .viewer-content h6      { font-size: 11pt; margin: 12pt 0 6pt;  }
+    .viewer-content ul,
+    .viewer-content ol      { margin: 6pt 0 6pt 1.25cm; padding: 0; }
+    .viewer-content li      { margin: 3pt 0; color: var(--paper-ink); }
+    .viewer-content table   { border-collapse: collapse; width: 100%; margin: 12pt 0; font-size: 10pt; }
+    .viewer-content th,
+    .viewer-content td      { border: 1px solid var(--paper-line); padding: 4pt 6pt; vertical-align: top; color: var(--paper-ink); }
+    .viewer-content th      { background: var(--paper-soft); font-weight: 700; }
+    .viewer-content pre     {
+      background: var(--paper-pre); color: var(--paper-ink); border: 1px solid var(--paper-border);
+      padding: 12pt; border-radius: 4px; overflow-x: auto;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 9.5pt; line-height: 1.4;
+      white-space: pre-wrap; word-wrap: break-word;
+    }
+    .viewer-content code    { font-family: Consolas, "Courier New", monospace; font-size: 10pt; background: var(--paper-soft); padding: 1px 4px; border-radius: 3px; color: var(--paper-ink); }
+    .viewer-content pre code { background: transparent; padding: 0; color: inherit; font-size: inherit; }
+    .viewer-content blockquote {
+      margin: 12pt 1.25cm; padding: 6pt 12pt 6pt 18pt;
+      border-left: 4px solid var(--paper-quote-border); background: var(--paper-quote-bg);
+      font-style: italic; line-height: 1.5; color: var(--paper-ink);
+    }
+    .viewer-content blockquote p { margin: 0; }
+    .viewer-content img     { max-width: 100%; height: auto; display: block; margin: 12pt auto; border: 1px solid var(--paper-border); }
+    .viewer-content figure  { margin: 12pt 0; text-align: center; }
+    .viewer-content figcaption { font-size: 10pt; font-style: italic; color: var(--paper-sub); margin-top: 4pt; }
+    .viewer-content a       { color: var(--paper-link); text-decoration: underline; }
+    .viewer-content hr      { border: none; border-top: 1px solid var(--paper-line); margin: 18pt 0; }
+
+    /* Шапка документа (заголовок + мета) */
+    .doc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 72px 16px;
+      border-bottom: 2px solid var(--paper-border);
+      flex-wrap: wrap;
+      background: var(--paper);
+    }
+    .doc-header h2 { margin: 0; font-size: 1.3em; font-family: Calibri, Arial, sans-serif; color: var(--paper-ink); }
+    .doc-header .doc-meta { color: var(--paper-sub); font-size: 0.88em; }
+
+    /* Загрузка / ошибка */
+    .loading-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: 400px; gap: 16px;
+      color: var(--paper-sub); padding: 48px;
+    }
+    .loading-spinner {
+      width: 48px; height: 48px; border: 4px solid var(--paper-line);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: 400px; gap: 16px;
+      color: var(--paper-error); text-align: center; padding: 48px;
+    }
+    .error-state .btn-retry {
+      margin-top: 8px; padding: 12px 32px; background: #0e9f9a;
+      color: #fff; border: none; border-radius: 8px;
+      font-weight: 700; cursor: pointer; font-size: 14px;
+    }
+    .error-state .btn-retry:hover { background: #0b7f7b; }
+    body.a11y .error-state .btn-retry { background: #ffe600; color: #000; }
+
+    /* Ссылка «назад» */
+    .link-back {
+      display: inline-block; color: #0e9f9a;
+      font-weight: 700; text-decoration: none;
+    }
+    .link-back:hover { text-decoration: underline; }
+    body.a11y .link-back { color: #ffe600 !important; }
+
+    /* Адаптив */
+    @media (max-width: 900px) {
+      .viewer-content { padding: 48px 36px 64px; }
+      .doc-header { padding: 16px 36px; }
+    }
+    @media (max-width: 600px) {
+      .viewer-content { padding: 24px 16px 40px; font-size: 11pt; }
+      .doc-header { padding: 12px 16px; }
+      .viewer-content h1 { font-size: 22pt; }
+      .viewer-content h2 { font-size: 18pt; }
+      .viewer-content h3 { font-size: 15pt; }
+      .viewer-content ul, .viewer-content ol { margin-left: 1cm; }
+    }
+
+    @media print {
+      :root, body.theme-dark, body.a11y {
+        --paper: #ffffff; --paper-ink: #000000; --paper-soft: #f0f0f0; --paper-pre: #f5f5f5;
+        --paper-line: #cccccc; --paper-border: #dddddd; --paper-link: #0066cc;
+        --paper-quote-bg: #f0f4fa; --paper-quote-border: #0066cc; --paper-sub: #666666; --paper-error: #c00000;
+      }
+      .viewer-page { box-shadow: none; max-width: none; margin: 0; border-radius: 0; border: none; }
+      .viewer-content { padding: 2.54cm; }
+      .doc-header, .site-header, .site-footer { display: none !important; }
+    }
+  
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header__inner">
+      <a class="brand" href="index.html" aria-label="На главную страницу">
+        <img class="brand__logo brand__logo--img" src="img/logo-pgktit.png" alt="" aria-hidden="true">
+        <h1 class="brand__text">
+          <span class="brand__badge">ЭУМК</span>
+          <span class="brand__title">«Веб-программирование на&nbsp;стороне&nbsp;сервера»</span>
+          <span class="brand__subtitle">Электронный учебно-методический комплекс</span>
+        </h1>
+      </a>
+      <div class="toolbar">
+        <button class="tool-btn tool-btn--a11y" type="button" id="a11y-toggle" aria-pressed="false" title="Версия для слабовидящих">
+          <span class="tool-btn__ico tool-btn__ico--eye" aria-hidden="true"></span>
+          <span class="tool-btn__txt">Для слабовидящих</span>
+        </button>
+        <button class="tool-btn tool-btn--theme" type="button" id="theme-toggle" aria-pressed="false" title="Переключить тему" aria-label="Переключить тему">
+          <span class="tool-btn__ico tool-btn__ico--moon" aria-hidden="true"></span>
+        </button>
+      </div>
+      <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav">
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+      </button>
+    </div>
+    <div class="container header__nav">
+      <nav class="nav" id="main-nav" aria-label="Основное меню">
+        <ul class="nav__list">
+          <li><a class="nav__link" href="index.html">Главная</a></li>
+          <li><a class="nav__link nav__link--active" href="theory-reader.html">Теория</a></li>
+          <li><a class="nav__link" href="practice-reader.html">Практика</a></li>
+          <li><a class="nav__link" href="control-reader.html">Контроль</a></li>
+          <li><a class="nav__link" href="extra.html">Материалы</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+
+      <div id="loading-state" class="loading-state" aria-live="polite">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <p>Загружаем документ, пожалуйста подождите…</p>
+      </div>
+
+      <div id="viewer-page" class="viewer-page" style="display:none;">
+        <div class="doc-header">
+          <h2 id="doc-title">Загрузка…</h2>
+          <span class="doc-meta" id="doc-meta"></span>
+        </div>
+        <div id="viewer-container" class="viewer-content"></div>
+      </div>
+
+      <p style="margin: 20px 0 32px;">
+        <a class="link-back" href="theory-reader.html">← Вернуться к теории</a>
+        &nbsp;&nbsp;
+        <a class="link-back" href="index.html">← На главную</a>
+      </p>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__inner">
+      <span class="footer__badge">ЭУМК</span>
+      <p class="footer__text">Электронный учебно-методический комплекс «Веб-программирование на стороне сервера»</p>
+    </div>
+  </footer>
+
+  <script src="js/vendor/mammoth.browser.min.js"></script>
+  <script src="js/lectures/index.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    (function () {
+      var container    = document.getElementById('viewer-container');
+      var viewerPage   = document.getElementById('viewer-page');
+      var loadingState = document.getElementById('loading-state');
+      var titleEl      = document.getElementById('doc-title');
+      var metaEl       = document.getElementById('doc-meta');
+
+      var params   = new URLSearchParams(window.location.search);
+      var fileName = params.get('file');
+
+      var lectures = {
+        '1 Обзор технологий создания веб.docx':                                           'Лекция 1. Обзор технологий создания веб-приложений',
+        '2_Механизм_работы_веб_сервера_Назначение_протокола_HTTP.docx':                   'Лекция 2. Механизм работы веб-сервера. Назначение протокола HTTP',
+        '3 Установка и настройка веб.docx':                                               'Лекция 3. Установка и настройка веб-сервера',
+        '4 Основы синтаксиса PHP.docx':                                                   'Лекция 4. Основы синтаксиса PHP',
+        '5 Работа с массивами и строками.docx':                                           'Лекция 5. Работа с массивами и строками',
+        '5_1_Работа_с_массивами_и_строками_в_РНР.docx':                                  'Лекция 5.1. Работа с массивами и строками в PHP',
+        '6 Условия.docx':                                                                 'Лекция 6. Условия и ветвление',
+        '6_1 Стандартные функции PHP.docx':                                               'Лекция 6.1. Стандартные функции PHP',
+        '7 Запросы get и post.docx':                                                      'Лекция 7. Запросы GET и POST',
+        '8_Работа_с_файловой_системой_с_помощью_языка_PHP.docx':                         'Лекция 8. Работа с файловой системой в PHP',
+        '9 Организация сессии.docx':                                                      'Лекция 9. Организация сессии',
+        '10 Функции.docx':                                                                'Лекция 10. Функции в PHP',
+        '11 ООП.docx':                                                                    'Лекция 11. Основы ООП в PHP',
+        '12 Классы и объекты в PHP.docx':                                                 'Лекция 12. Классы и объекты в PHP',
+        '13 Трейты.docx':                                                                 'Лекция 13. Трейты в PHP',
+        '14 Клиент.docx':                                                                 'Лекция 14. Клиентская часть веб-приложений',
+        '15 Введение в Node.docx':                                                        'Лекция 15. Введение в Node.js',
+        '16.1 Пакетный менеджер npm и управление пакетами.docx':                         'Лекция 16.1. Пакетный менеджер npm и управление пакетами',
+        '16.2 Общие сведения о NPM.docx':                                                 'Лекция 16.2. Общие сведения о NPM',
+        '17 Цикл событий.docx':                                                           'Лекция 17. Цикл событий (Event Loop) в Node.js',
+        '18 Асинхронное программирование в Node.docx':                                   'Лекция 18. Асинхронное программирование в Node.js',
+        '19 Работа с файлами.docx':                                                       'Лекция 19. Работа с файлами в Node.js',
+        '19.1 Работа с файловой системой в Node.docx':                                   'Лекция 19.1. Работа с файловой системой в Node.js',
+        '20 Сведения о HTTP.docx':                                                        'Лекция 20. Сведения о протоколе HTTP',
+        '20.1 Сервер.docx':                                                               'Лекция 20.1. Создание HTTP-сервера на Node.js',
+        '21 Серверные фреймворки Koa.docx':                                               'Лекция 21. Серверные фреймворки: Koa',
+        '22 Понятие о CLI.docx':                                                          'Лекция 22. Понятие о CLI',
+        '23 Модули OS.docx':                                                              'Лекция 23. Модули OS в Node.js',
+        '24 Работа с потоками .docx':                                                     'Лекция 24. Работа с потоками (Streams) в Node.js',
+        '25 Node.js_Базы_данных.docx':                                                    'Лекция 25. Node.js и базы данных'
+      };
+
+      function escapeHtml(text) {
+        var d = document.createElement('div');
+        d.textContent = text;
+        return d.innerHTML;
+      }
+
+      function showError(msg) {
+        loadingState.style.display = 'none';
+        viewerPage.style.display  = 'block';
+        titleEl.textContent = 'Ошибка';
+        container.innerHTML =
+          '<div class="error-state">' +
+            '<p>' + escapeHtml(msg) + '</p>' +
+            '<button class="btn-retry" onclick="window.location.reload()">Повторить попытку</button>' +
+          '</div>';
+      }
+
+      function showContent(html, title, name) {
+        titleEl.textContent = title;
+        metaEl.textContent  = 'Файл: ' + name;
+        container.innerHTML = html;
+        loadingState.style.display = 'none';
+        viewerPage.style.display   = 'block';
+      }
+
+      // --- Встроенные лекции (работают и по file://, и по http) ---
+      function b64ToArrayBuffer(b64) {
+        var bin = atob(b64);
+        var len = bin.length;
+        var bytes = new Uint8Array(len);
+        for (var i = 0; i < len; i++) bytes[i] = bin.charCodeAt(i);
+        return bytes.buffer;
+      }
+
+      function ensureLectureLoaded(idx, file, cb) {
+        if (window.LECTURE_FILES && window.LECTURE_FILES[file]) { cb(null); return; }
+        var s = document.createElement('script');
+        s.src = 'js/lectures/lec-' + idx + '.js';
+        s.onload = function () { cb(null); };
+        s.onerror = function () { cb(new Error('не удалось загрузить фрагмент лекции')); };
+        document.head.appendChild(s);
+      }
+
+      if (!fileName) {
+        showError('Не указан файл лекции. Параметр "file" отсутствует в URL.');
+        return;
+      }
+
+      var lectureTitle = lectures[fileName] || ('Лекция: ' + fileName);
+      var idx = (window.LECTURE_INDEX || {})[fileName];
+
+      if (idx === undefined) {
+        showError('Лекция не встроена в сборку: ' + fileName);
+        return;
+      }
+
+      ensureLectureLoaded(idx, fileName, function (loadErr) {
+        if (loadErr) { showError('Не удалось загрузить лекцию: ' + loadErr.message + '\n\nФайл: ' + fileName); return; }
+        var b64 = (window.LECTURE_FILES || {})[fileName];
+        mammoth.convertToHtml({ arrayBuffer: b64ToArrayBuffer(b64) })
+          .then(function (result) {
+            if (result.messages.length) console.warn('mammoth:', result.messages);
+            showContent(result.value, lectureTitle, fileName);
+          })
+          .catch(function (err) {
+            console.error(err);
+            showError('Не удалось отобразить лекцию: ' + err.message + '\n\nФайл: ' + fileName);
+          });
+      });
+    })();
+  </script>
+</body>
+</html>

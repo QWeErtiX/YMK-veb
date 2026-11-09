@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Теория — ЭУМК «Веб-программирование на стороне сервера»</title>
+  <link rel="icon" type="image/png" href="img/logo-pgktit.png">
+  <link rel="stylesheet" href="css/style.css?v=3">
+  <style>
+    /* =========================================================
+       THEORY READER — боковая панель + просмотр лекции
+       ========================================================= */
+
+    /* Страница прокручивается целиком; сайдбар — липкий */
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .site-main {
+      padding: 0;
+    }
+
+    /* Обёртка: боковая панель + область просмотра */
+    .reader-layout {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    /* ---- БОКОВАЯ ПАНЕЛЬ ---- */
+    .sidebar {
+      width: 300px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--card);
+      border-right: 2px solid var(--line);
+      overflow: hidden;
+      transition: width .3s ease, transform .3s ease;
+      position: sticky;
+      top: var(--header-h, 72px);
+      max-height: calc(100vh - var(--header-h, 72px));
+    }
+
+    .sidebar__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px 14px;
+      border-bottom: 2px solid var(--line);
+      flex-shrink: 0;
+    }
+
+    .sidebar__title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--ink);
+      margin: 0;
+      letter-spacing: .01em;
+    }
+
+    .sidebar__toggle {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1.5px solid var(--line);
+      background: transparent;
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: background .2s, color .2s;
+    }
+    .sidebar__toggle:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .sidebar__search {
+      padding: 12px 14px 10px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar__search input {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1.5px solid var(--line);
+      background: var(--bg);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      transition: border-color .2s;
+      box-sizing: border-box;
+    }
+    .sidebar__search input:focus {
+      border-color: var(--accent);
+    }
+
+    .sidebar__list {
+      overflow-y: auto;
+      flex: 1 1 auto;
+      padding: 10px 10px 20px;
+    }
+
+    /* Группа лекций */
+    .lec-group__label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 10px 8px 4px;
+      display: block;
+    }
+
+    .lec-group__list {
+      list-style: none;
+      margin: 0 0 8px;
+      padding: 0;
+    }
+
+    .lec-item a {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.35;
+      transition: background .18s, color .18s;
+      cursor: pointer;
+    }
+    .lec-item a:hover {
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+    }
+    .lec-item a.is-active {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--indigo) 100%);
+      color: #fff;
+      font-weight: 700;
+    }
+    .lec-item a.is-active .lec-item__num {
+      background: rgba(255,255,255,.25);
+      color: #fff;
+    }
+
+    .lec-item__num {
+      flex-shrink: 0;
+      min-width: 30px;
+      height: 22px;
+      border-radius: 6px;
+      background: var(--indigo-soft);
+      color: var(--indigo);
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    /* Схлопнутая боковая панель */
+    .sidebar.is-collapsed {
+      width: 0;
+      border-right-width: 0;
+    }
+
+    /* Кнопка открытия панели (когда она закрыта) */
+    .sidebar-open-btn {
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 50;
+      width: 34px;
+      height: 110px;
+      background: linear-gradient(135deg, var(--accent), var(--indigo));
+      border: none;
+      border-radius: 0 10px 10px 0;
+      color: #fff;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: inherit;
+      letter-spacing: .12em;
+      writing-mode: vertical-rl;
+      padding: 14px 0;
+      box-shadow: 2px 0 12px rgba(0,0,0,.18);
+      transition: width .2s;
+    }
+    .sidebar-open-btn:hover { width: 38px; }
+    .sidebar-open-btn.is-visible { display: flex; }
+
+    /* ---- ОБЛАСТЬ ПРОСМОТРА ---- */
+    .reader-main {
+      flex: 1 1 auto;
+      min-width: 0;
+      background: var(--page-bg);
+    }
+
+    .reader-welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 60vh;
+      padding: 60px 40px;
+      color: var(--muted);
+      gap: 20px;
+    }
+    .reader-welcome h2 {
+      font-size: 1.5rem;
+      color: var(--ink);
+      margin: 0;
+    }
+    .reader-welcome p {
+      font-size: 1rem;
+      max-width: 420px;
+      margin: 0;
+    }
+
+    /* ============================================
+       «БУМАГА» ЛЕКЦИИ — следует теме / режиму a11y
+       ============================================ */
+    :root {
+      --paper: #ffffff;
+      --paper-ink: #000000;
+      --paper-soft: #f0f0f0;
+      --paper-pre: #f5f5f5;
+      --paper-line: #cccccc;
+      --paper-border: #dddddd;
+      --paper-link: #0066cc;
+      --paper-quote-bg: #f0f4fa;
+      --paper-quote-border: #0e9f9a;
+      --paper-sub: #888888;
+    }
+    body.theme-dark {
+      --paper: #1b2342;
+      --paper-ink: #e9ecf8;
+      --paper-soft: #232c56;
+      --paper-pre: #131a35;
+      --paper-line: #2c3560;
+      --paper-border: #2c3560;
+      --paper-link: #8fd3ff;
+      --paper-quote-bg: #16224a;
+      --paper-quote-border: #2ec9c2;
+      --paper-sub: #a3aac8;
+    }
+    body.a11y {
+      --paper: #000000;
+      --paper-ink: #ffe600;
+      --paper-soft: #000000;
+      --paper-pre: #000000;
+      --paper-line: #ffe600;
+      --paper-border: #ffe600;
+      --paper-link: #ffe600;
+      --paper-quote-bg: #000000;
+      --paper-quote-border: #ffe600;
+      --paper-sub: #ffe600;
+    }
+
+    /* Блок с лекцией по теме */
+    .reader-doc {
+      max-width: 860px;
+      width: 100%;
+      margin: 28px auto 48px;
+      background: var(--paper);
+      color: var(--paper-ink);
+      border-radius: 8px;
+      box-shadow: 0 4px 32px rgba(0,0,0,.13);
+      overflow: hidden;
+      display: none;
+      flex-shrink: 0;
+    }
+    body.theme-dark .reader-doc { box-shadow: 0 4px 40px rgba(0,0,0,.55); }
+    body.a11y .reader-doc { border: 3px solid #ffe600; }
+    .reader-doc.is-visible { display: block; }
+
+    .reader-doc__head {
+      padding: 20px 56px 16px;
+      border-bottom: 2px solid var(--paper-border);
+      background: var(--paper);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .reader-download {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .02em;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+    }
+    .reader-download:hover { background: var(--accent-dark); transform: translateY(-1px); }
+    .reader-download:active { transform: translateY(0); }
+    body.a11y .reader-download { background: #ffe600; color: #000; }
+    body.a11y .reader-download:hover { background: #fff200; }
+    .reader-doc__title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--paper-ink);
+      margin: 0 0 4px;
+      font-family: Calibri, Arial, sans-serif;
+    }
+    .reader-doc__meta { font-size: 12px; color: var(--paper-sub); }
+
+    .reader-doc__content {
+      padding: 48px 56px 72px;
+      font-family: "Times New Roman", Georgia, serif;
+      font-size: 12pt;
+      line-height: 1.5;
+      color: var(--paper-ink);
+      background: var(--paper);
+    }
+
+    /* Типографика */
+    .reader-doc__content p       { margin: 0 0 10pt; color: var(--paper-ink); }
+    .reader-doc__content h1,
+    .reader-doc__content h2,
+    .reader-doc__content h3,
+    .reader-doc__content h4,
+    .reader-doc__content h5,
+    .reader-doc__content h6      { color: var(--paper-ink); font-weight: 700; }
+    .reader-doc__content h1      { font-size: 24pt; margin: 20pt 0 10pt; }
+    .reader-doc__content h2      { font-size: 20pt; margin: 20pt 0 10pt; }
+    .reader-doc__content h3      { font-size: 16pt; margin: 16pt 0 8pt;  }
+    .reader-doc__content h4      { font-size: 13pt; margin: 14pt 0 7pt;  }
+    .reader-doc__content h5      { font-size: 12pt; margin: 12pt 0 6pt;  }
+    .reader-doc__content h6      { font-size: 11pt; margin: 10pt 0 5pt;  }
+    .reader-doc__content ul,
+    .reader-doc__content ol      { margin: 6pt 0 6pt 1.25cm; padding: 0; }
+    .reader-doc__content li      { margin: 3pt 0; color: var(--paper-ink); }
+    .reader-doc__content table   { border-collapse: collapse; width: 100%; margin: 12pt 0; font-size: 10pt; }
+    .reader-doc__content th,
+    .reader-doc__content td      { border: 1px solid var(--paper-line); padding: 4pt 6pt; vertical-align: top; color: var(--paper-ink); }
+    .reader-doc__content th      { background: var(--paper-soft); font-weight: 700; }
+    .reader-doc__content pre     {
+      background: var(--paper-pre); color: var(--paper-ink); border: 1px solid var(--paper-border);
+      padding: 12pt; border-radius: 4px; overflow-x: auto;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 9.5pt; line-height: 1.4;
+      white-space: pre-wrap; word-wrap: break-word;
+    }
+    .reader-doc__content code    { font-family: Consolas, "Courier New", monospace; font-size: 10pt; background: var(--paper-soft); padding: 1px 4px; border-radius: 3px; color: var(--paper-ink); }
+    .reader-doc__content pre code { background: transparent; padding: 0; color: inherit; }
+    .reader-doc__content blockquote {
+      margin: 12pt 1.25cm; padding: 6pt 12pt 6pt 18pt;
+      border-left: 4px solid var(--paper-quote-border); background: var(--paper-quote-bg);
+      font-style: italic; line-height: 1.5; color: var(--paper-ink);
+    }
+    .reader-doc__content blockquote p { margin: 0; }
+    .reader-doc__content img     { max-width: 100%; height: auto; display: block; margin: 12pt auto; border: 1px solid var(--paper-border); }
+    .reader-doc__content a       { color: var(--paper-link); text-decoration: underline; }
+    .reader-doc__content hr      { border: none; border-top: 1px solid var(--paper-line); margin: 18pt 0; }
+
+        /* Загрузка / ошибка */
+    .reader-loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      gap: 16px;
+      color: var(--muted);
+      padding: 48px;
+    }
+    .reader-loading.is-visible { display: flex; }
+    .reader-spinner {
+      width: 44px; height: 44px;
+      border: 4px solid var(--line);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .reader-error {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      gap: 12px;
+      color: #c00;
+      text-align: center;
+      padding: 48px;
+    }
+    .reader-error.is-visible { display: flex; }
+
+    /* Навигация между лекциями */
+    .reader-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 56px 20px;
+      gap: 12px;
+      background: var(--paper);
+      border-top: 1px solid var(--paper-border);
+    }
+    .reader-nav__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1.5px solid var(--paper-line);
+      background: var(--paper-soft);
+      color: var(--paper-ink);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s, border-color .2s, color .2s;
+      text-decoration: none;
+    }
+    .reader-nav__btn:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent-dark);
+    }
+    body.a11y .reader-nav__btn { background: #000; color: #ffe600; border-color: #ffe600; }
+    body.a11y .reader-nav__btn:hover { background: #ffe600; color: #000; }
+    .reader-nav__btn:disabled,
+    .reader-nav__btn[data-disabled] {
+      opacity: .35;
+      pointer-events: none;
+    }
+    .reader-nav__info {
+      font-size: 12px;
+      color: var(--paper-sub);
+      text-align: center;
+    }
+
+    /* Мобильный оверлей боковой панели */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      background: rgba(0,0,0,.45);
+    }
+    .sidebar-overlay.is-visible { display: block; }
+
+    /* ---- АДАПТИВ ---- */
+    @media (max-width: 860px) {
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 45;
+        width: 280px;
+        transform: translateX(-100%);
+        transition: transform .3s ease;
+        box-shadow: 4px 0 24px rgba(0,0,0,.2);
+      }
+      .sidebar.is-open {
+        transform: translateX(0);
+      }
+      .sidebar.is-collapsed {
+        width: 280px;
+        border-right-width: 2px;
+        transform: translateX(-100%);
+      }
+      .sidebar-open-btn {
+        display: flex !important;
+        top: auto;
+        bottom: 18px;
+        left: auto;
+        right: 14px;
+        transform: none;
+        writing-mode: horizontal-tb;
+        width: auto;
+        height: auto;
+        padding: 12px 20px;
+        border-radius: 26px;
+        letter-spacing: .02em;
+      }
+      .reader-layout { display: block; }
+      .reader-main { height: auto; overflow: visible; }
+      .sidebar { max-height: none; height: 100vh; }
+      .reader-doc__content { padding: 28px 24px 48px; }
+      .reader-doc__head { padding: 14px 24px; }
+      .reader-nav { padding: 12px 24px 16px; }
+    }
+
+    @media (max-width: 540px) {
+      .reader-doc__content { padding: 20px 14px 40px; font-size: 11pt; }
+      .reader-doc__head { padding: 12px 14px; }
+      .reader-nav { padding: 10px 14px 14px; flex-wrap: wrap; }
+      .reader-nav__btn { font-size: 12px; padding: 8px 14px; }
+    }
+
+    /* a11y */
+    body.a11y .reader-error { color: #ffe600 !important; }
+    body.a11y .reader-error button { background: #ffe600 !important; color: #000 !important; }
+    body.theme-dark .reader-error { color: #ff8a8a; }
+    body.a11y .sidebar { background: #000 !important; border-color: #ffe600 !important; }
+    body.a11y .sidebar__title { color: #ffe600 !important; }
+    body.a11y .sidebar__search input { background: #000 !important; color: #ffe600 !important; border-color: #ffe600 !important; }
+    body.a11y .lec-group__label { color: #ffe600 !important; }
+    body.a11y .lec-item a { color: #ffe600 !important; }
+    body.a11y .lec-item a:hover { background: #ffe600 !important; color: #000 !important; }
+    body.a11y .lec-item a.is-active { background: #ffe600 !important; color: #000 !important; }
+    body.a11y .lec-item__num { background: #000 !important; color: #ffe600 !important; border: 1px solid #ffe600; }
+    body.a11y .lec-item a.is-active .lec-item__num { background: #000 !important; color: #ffe600 !important; }
+    body.a11y .sidebar__toggle { background: #000 !important; border-color: #ffe600 !important; color: #ffe600 !important; }
+    body.a11y .reader-welcome h2 { color: #ffe600 !important; }
+    body.a11y .reader-welcome p { color: #ffe600 !important; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header__inner">
+      <a class="brand" href="index.html" aria-label="На главную страницу">
+        <img class="brand__logo brand__logo--img" src="img/logo-pgktit.png" alt="" aria-hidden="true">
+        <h1 class="brand__text">
+          <span class="brand__badge">ЭУМК</span>
+          <span class="brand__title">«Веб-программирование на&nbsp;стороне&nbsp;сервера»</span>
+          <span class="brand__subtitle">Электронный учебно-методический комплекс</span>
+        </h1>
+      </a>
+      <div class="toolbar">
+        <button class="tool-btn tool-btn--a11y" type="button" id="a11y-toggle" aria-pressed="false" title="Версия для слабовидящих">
+          <span class="tool-btn__ico tool-btn__ico--eye" aria-hidden="true"></span>
+          <span class="tool-btn__txt">Для слабовидящих</span>
+        </button>
+        <button class="tool-btn tool-btn--theme" type="button" id="theme-toggle" aria-pressed="false" title="Переключить тему" aria-label="Переключить тему">
+          <span class="tool-btn__ico tool-btn__ico--moon" aria-hidden="true"></span>
+        </button>
+      </div>
+      <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav">
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+      </button>
+    </div>
+    <div class="container header__nav">
+      <nav class="nav" id="main-nav" aria-label="Основное меню">
+        <ul class="nav__list">
+          <li><a class="nav__link" href="index.html">Главная</a></li>
+          <li><a class="nav__link nav__link--active" href="theory-reader.html">Теория</a></li>
+          <li><a class="nav__link" href="practice-reader.html">Практика</a></li>
+          <li><a class="nav__link" href="control-reader.html">Контроль</a></li>
+          <li><a class="nav__link" href="extra.html">Материалы</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="reader-layout">
+
+      <!-- Боковая панель -->
+      <aside class="sidebar" id="sidebar" aria-label="Список лекций">
+        <div class="sidebar__head">
+          <span class="sidebar__title">Лекции</span>
+          <button class="sidebar__toggle" id="sidebar-close" title="Скрыть панель" aria-label="Скрыть панель">←</button>
+        </div>
+        <div class="sidebar__search">
+          <input type="search" id="lec-search" placeholder="Поиск лекции…" aria-label="Поиск лекции">
+        </div>
+        <div class="sidebar__list" id="sidebar-list">
+
+          <span class="lec-group__label">PHP (1–14)</span>
+          <ul class="lec-group__list">
+            <li class="lec-item"><a href="#" data-file="1 Обзор технологий создания веб.docx" data-idx="0"><span class="lec-item__num">1</span>Обзор технологий создания веб-приложений</a></li>
+            <li class="lec-item"><a href="#" data-file="2_Механизм_работы_веб_сервера_Назначение_протокола_HTTP.docx" data-idx="1"><span class="lec-item__num">2</span>Механизм работы веб-сервера. HTTP</a></li>
+            <li class="lec-item"><a href="#" data-file="3 Установка и настройка веб.docx" data-idx="2"><span class="lec-item__num">3</span>Установка и настройка веб-сервера</a></li>
+            <li class="lec-item"><a href="#" data-file="4 Основы синтаксиса PHP.docx" data-idx="3"><span class="lec-item__num">4</span>Основы синтаксиса PHP</a></li>
+            <li class="lec-item"><a href="#" data-file="5 Работа с массивами и строками.docx" data-idx="4"><span class="lec-item__num">5</span>Работа с массивами и строками</a></li>
+            <li class="lec-item"><a href="#" data-file="5_1_Работа_с_массивами_и_строками_в_РНР.docx" data-idx="5"><span class="lec-item__num">5.1</span>Массивы и строки в PHP</a></li>
+            <li class="lec-item"><a href="#" data-file="6 Условия.docx" data-idx="6"><span class="lec-item__num">6</span>Условия и ветвление</a></li>
+            <li class="lec-item"><a href="#" data-file="6_1 Стандартные функции PHP.docx" data-idx="7"><span class="lec-item__num">6.1</span>Стандартные функции PHP</a></li>
+            <li class="lec-item"><a href="#" data-file="7 Запросы get и post.docx" data-idx="8"><span class="lec-item__num">7</span>Запросы GET и POST</a></li>
+            <li class="lec-item"><a href="#" data-file="8_Работа_с_файловой_системой_с_помощью_языка_PHP.docx" data-idx="9"><span class="lec-item__num">8</span>Работа с файловой системой</a></li>
+            <li class="lec-item"><a href="#" data-file="9 Организация сессии.docx" data-idx="10"><span class="lec-item__num">9</span>Организация сессии</a></li>
+            <li class="lec-item"><a href="#" data-file="10 Функции.docx" data-idx="11"><span class="lec-item__num">10</span>Функции в PHP</a></li>
+            <li class="lec-item"><a href="#" data-file="11 ООП.docx" data-idx="12"><span class="lec-item__num">11</span>Основы ООП в PHP</a></li>
+            <li class="lec-item"><a href="#" data-file="12 Классы и объекты в PHP.docx" data-idx="13"><span class="lec-item__num">12</span>Классы и объекты в PHP</a></li>
+            <li class="lec-item"><a href="#" data-file="13 Трейты.docx" data-idx="14"><span class="lec-item__num">13</span>Трейты в PHP</a></li>
+            <li class="lec-item"><a href="#" data-file="14 Клиент.docx" data-idx="15"><span class="lec-item__num">14</span>Клиентская часть веб-приложений</a></li>
+          </ul>
+
+          <span class="lec-group__label">Node.js (15–25)</span>
+          <ul class="lec-group__list">
+            <li class="lec-item"><a href="#" data-file="15 Введение в Node.docx" data-idx="16"><span class="lec-item__num">15</span>Введение в Node.js</a></li>
+            <li class="lec-item"><a href="#" data-file="16.1 Пакетный менеджер npm и управление пакетами.docx" data-idx="17"><span class="lec-item__num">16.1</span>Пакетный менеджер npm</a></li>
+            <li class="lec-item"><a href="#" data-file="16.2 Общие сведения о NPM.docx" data-idx="18"><span class="lec-item__num">16.2</span>Общие сведения о NPM</a></li>
+            <li class="lec-item"><a href="#" data-file="17 Цикл событий.docx" data-idx="19"><span class="lec-item__num">17</span>Цикл событий (Event Loop)</a></li>
+            <li class="lec-item"><a href="#" data-file="18 Асинхронное программирование в Node.docx" data-idx="20"><span class="lec-item__num">18</span>Асинхронное программирование</a></li>
+            <li class="lec-item"><a href="#" data-file="19 Работа с файлами.docx" data-idx="21"><span class="lec-item__num">19</span>Работа с файлами</a></li>
+            <li class="lec-item"><a href="#" data-file="19.1 Работа с файловой системой в Node.docx" data-idx="22"><span class="lec-item__num">19.1</span>Работа с файловой системой</a></li>
+            <li class="lec-item"><a href="#" data-file="20 Сведения о HTTP.docx" data-idx="23"><span class="lec-item__num">20</span>Сведения о протоколе HTTP</a></li>
+            <li class="lec-item"><a href="#" data-file="20.1 Сервер.docx" data-idx="24"><span class="lec-item__num">20.1</span>Создание HTTP-сервера</a></li>
+            <li class="lec-item"><a href="#" data-file="21 Серверные фреймворки Koa.docx" data-idx="25"><span class="lec-item__num">21</span>Серверные фреймворки: Koa</a></li>
+            <li class="lec-item"><a href="#" data-file="22 Понятие о CLI.docx" data-idx="26"><span class="lec-item__num">22</span>Понятие о CLI</a></li>
+            <li class="lec-item"><a href="#" data-file="23 Модули OS.docx" data-idx="27"><span class="lec-item__num">23</span>Модули OS в Node.js</a></li>
+            <li class="lec-item"><a href="#" data-file="24 Работа с потоками .docx" data-idx="28"><span class="lec-item__num">24</span>Работа с потоками (Streams)</a></li>
+            <li class="lec-item"><a href="#" data-file="25 Node.js_Базы_данных.docx" data-idx="29"><span class="lec-item__num">25</span>Node.js и базы данных</a></li>
+          </ul>
+
+        </div>
+      </aside>
+
+      <!-- Оверлей для мобильных -->
+      <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+      <!-- Кнопка открытия панели -->
+      <button class="sidebar-open-btn" id="sidebar-open-btn" title="Открыть список лекций" aria-label="Открыть список лекций">Список</button>
+
+      <!-- Основная область -->
+      <div class="reader-main" id="reader-main">
+
+        <!-- Приветствие (пока лекция не выбрана) -->
+        <div class="reader-welcome" id="reader-welcome">
+          <h2>Выберите лекцию</h2>
+          <p>Откройте любую лекцию в списке слева, чтобы начать чтение.</p>
+        </div>
+
+        <!-- Спиннер загрузки -->
+        <div class="reader-loading" id="reader-loading">
+          <div class="reader-spinner"></div>
+          <p>Загрузка лекции…</p>
+        </div>
+
+        <!-- Ошибка -->
+        <div class="reader-error" id="reader-error">
+          <p id="reader-error-msg">Не удалось загрузить лекцию.</p>
+          <button onclick="readerRetry()" style="padding:10px 24px;background:#0e9f9a;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Повторить</button>
+        </div>
+
+        <!-- Документ -->
+        <div class="reader-doc" id="reader-doc">
+          <div class="reader-doc__head">
+            <div>
+              <div class="reader-doc__title" id="reader-doc-title">—</div>
+              <div class="reader-doc__meta" id="reader-doc-meta"></div>
+            </div>
+            <button class="reader-download" id="btn-download" type="button">Скачать лекцию</button>
+          </div>
+          <div class="reader-doc__content" id="reader-doc-content"></div>
+          <div class="reader-nav">
+            <button class="reader-nav__btn" id="btn-prev">← Предыдущая</button>
+            <span class="reader-nav__info" id="nav-info"></span>
+            <button class="reader-nav__btn" id="btn-next">Следующая →</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__inner">
+      <span class="footer__badge">ЭУМК</span>
+      <p class="footer__text">Электронный учебно-методический комплекс «Веб-программирование на стороне сервера»</p>
+    </div>
+  </footer>
+
+  <script src="js/vendor/mammoth.browser.min.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+  (function () {
+
+    // --- Список лекций ---
+    var LECTURES = [
+      { num: '1',    file: '1 Обзор технологий создания веб.docx',                                        title: 'Лекция 1. Обзор технологий создания веб-приложений' },
+      { num: '2',    file: '2_Механизм_работы_веб_сервера_Назначение_протокола_HTTP.docx',                title: 'Лекция 2. Механизм работы веб-сервера. HTTP' },
+      { num: '3',    file: '3 Установка и настройка веб.docx',                                            title: 'Лекция 3. Установка и настройка веб-сервера' },
+      { num: '4',    file: '4 Основы синтаксиса PHP.docx',                                               title: 'Лекция 4. Основы синтаксиса PHP' },
+      { num: '5',    file: '5 Работа с массивами и строками.docx',                                        title: 'Лекция 5. Работа с массивами и строками' },
+      { num: '5.1',  file: '5_1_Работа_с_массивами_и_строками_в_РНР.docx',                               title: 'Лекция 5.1. Массивы и строки в PHP' },
+      { num: '6',    file: '6 Условия.docx',                                                             title: 'Лекция 6. Условия и ветвление' },
+      { num: '6.1',  file: '6_1 Стандартные функции PHP.docx',                                           title: 'Лекция 6.1. Стандартные функции PHP' },
+      { num: '7',    file: '7 Запросы get и post.docx',                                                  title: 'Лекция 7. Запросы GET и POST' },
+      { num: '8',    file: '8_Работа_с_файловой_системой_с_помощью_языка_PHP.docx',                      title: 'Лекция 8. Работа с файловой системой в PHP' },
+      { num: '9',    file: '9 Организация сессии.docx',                                                  title: 'Лекция 9. Организация сессии' },
+      { num: '10',   file: '10 Функции.docx',                                                            title: 'Лекция 10. Функции в PHP' },
+      { num: '11',   file: '11 ООП.docx',                                                                title: 'Лекция 11. Основы ООП в PHP' },
+      { num: '12',   file: '12 Классы и объекты в PHP.docx',                                             title: 'Лекция 12. Классы и объекты в PHP' },
+      { num: '13',   file: '13 Трейты.docx',                                                             title: 'Лекция 13. Трейты в PHP' },
+      { num: '14',   file: '14 Клиент.docx',                                                             title: 'Лекция 14. Клиентская часть веб-приложений' },
+      { num: '15',   file: '15 Введение в Node.docx',                                                    title: 'Лекция 15. Введение в Node.js' },
+      { num: '16.1', file: '16.1 Пакетный менеджер npm и управление пакетами.docx',                      title: 'Лекция 16.1. Пакетный менеджер npm' },
+      { num: '16.2', file: '16.2 Общие сведения о NPM.docx',                                             title: 'Лекция 16.2. Общие сведения о NPM' },
+      { num: '17',   file: '17 Цикл событий.docx',                                                      title: 'Лекция 17. Цикл событий (Event Loop)' },
+      { num: '18',   file: '18 Асинхронное программирование в Node.docx',                                title: 'Лекция 18. Асинхронное программирование в Node.js' },
+      { num: '19',   file: '19 Работа с файлами.docx',                                                   title: 'Лекция 19. Работа с файлами в Node.js' },
+      { num: '19.1', file: '19.1 Работа с файловой системой в Node.docx',                                title: 'Лекция 19.1. Работа с файловой системой в Node.js' },
+      { num: '20',   file: '20 Сведения о HTTP.docx',                                                    title: 'Лекция 20. Сведения о протоколе HTTP' },
+      { num: '20.1', file: '20.1 Сервер.docx',                                                           title: 'Лекция 20.1. Создание HTTP-сервера на Node.js' },
+      { num: '21',   file: '21 Серверные фреймворки Koa.docx',                                           title: 'Лекция 21. Серверные фреймворки: Koa' },
+      { num: '22',   file: '22 Понятие о CLI.docx',                                                      title: 'Лекция 22. Понятие о CLI' },
+      { num: '23',   file: '23 Модули OS.docx',                                                          title: 'Лекция 23. Модули OS в Node.js' },
+      { num: '24',   file: '24 Работа с потоками .docx',                                                 title: 'Лекция 24. Работа с потоками (Streams)' },
+      { num: '25',   file: '25 Node.js_Базы_данных.docx',                                                title: 'Лекция 25. Node.js и базы данных' }
+    ];
+
+    // --- Встроенные лекции (работают и по file://, и по http) ---
+    var fragmentLoading = {};
+
+    function ensureLectureLoaded(idx, cb) {
+      var lec = LECTURES[idx];
+      if (window.LECTURE_FILES && LECTURE_FILES[lec.file]) { cb(null); return; }
+      if (fragmentLoading[idx]) { fragmentLoading[idx].push(cb); return; }
+      fragmentLoading[idx] = [cb];
+      var s = document.createElement('script');
+      s.src = 'js/lectures/lec-' + idx + '.js';
+      s.onload = function () {
+        var cbs = fragmentLoading[idx]; fragmentLoading[idx] = null;
+        cbs.forEach(function (fn) { fn(null); });
+      };
+      s.onerror = function () {
+        var cbs = fragmentLoading[idx]; fragmentLoading[idx] = null;
+        var err = new Error('не удалось загрузить фрагмент лекции');
+        cbs.forEach(function (fn) { fn(err); });
+      };
+      document.head.appendChild(s);
+    }
+
+    function b64ToArrayBuffer(b64) {
+      var bin = atob(b64);
+      var len = bin.length;
+      var bytes = new Uint8Array(len);
+      for (var i = 0; i < len; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes.buffer;
+    }
+
+    var currentIdx   = -1;
+    var lastFailFile = null;
+
+    // DOM refs
+    var sidebar      = document.getElementById('sidebar');
+    var sidebarClose = document.getElementById('sidebar-close');
+    var sidebarOpenBtn = document.getElementById('sidebar-open-btn');
+    var sidebarOverlay = document.getElementById('sidebar-overlay');
+    var searchInput  = document.getElementById('lec-search');
+    var sidebarList  = document.getElementById('sidebar-list');
+
+    var welcome      = document.getElementById('reader-welcome');
+    var loading      = document.getElementById('reader-loading');
+    var errorEl      = document.getElementById('reader-error');
+    var errorMsg     = document.getElementById('reader-error-msg');
+    var docEl        = document.getElementById('reader-doc');
+    var docTitle     = document.getElementById('reader-doc-title');
+    var docMeta      = document.getElementById('reader-doc-meta');
+    var docContent   = document.getElementById('reader-doc-content');
+    var navInfo      = document.getElementById('nav-info');
+    var btnPrev      = document.getElementById('btn-prev');
+    var btnNext      = document.getElementById('btn-next');
+    var btnDownload  = document.getElementById('btn-download');
+
+    // Липкий сайдбар под липкой шапкой: высота шапки в CSS-переменную
+    var headerEl = document.querySelector('.site-header');
+    function syncHeaderH() {
+      if (!headerEl) return;
+      document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
+    }
+    syncHeaderH();
+    window.addEventListener('resize', syncHeaderH);
+
+    // --- Sidebar toggle (desktop) ---
+    sidebarClose.addEventListener('click', function () {
+      sidebar.classList.add('is-collapsed');
+      sidebarOpenBtn.classList.add('is-visible');
+    });
+
+    sidebarOpenBtn.addEventListener('click', function () {
+      sidebar.classList.remove('is-collapsed');
+      sidebar.classList.add('is-open');
+      sidebarOpenBtn.classList.remove('is-visible');
+      sidebarOverlay.classList.add('is-visible');
+    });
+
+    sidebarOverlay.addEventListener('click', closeMobileSidebar);
+
+    function closeMobileSidebar() {
+      sidebar.classList.remove('is-open');
+      sidebarOverlay.classList.remove('is-visible');
+    }
+
+    // --- Поиск ---
+    searchInput.addEventListener('input', function () {
+      var q = this.value.trim().toLowerCase();
+      var items = sidebarList.querySelectorAll('.lec-item');
+      var groups = sidebarList.querySelectorAll('.lec-group__label');
+      items.forEach(function (li) {
+        var text = li.textContent.toLowerCase();
+        li.style.display = (!q || text.indexOf(q) !== -1) ? '' : 'none';
+      });
+      // Скрываем заголовки групп если все их элементы скрыты
+      groups.forEach(function (label) {
+        var ul = label.nextElementSibling;
+        if (!ul) return;
+        var visible = ul.querySelectorAll('.lec-item:not([style*="display: none"])').length;
+        label.style.display = visible ? '' : 'none';
+        ul.style.display = visible ? '' : 'none';
+      });
+    });
+
+    // --- Клик по лекции ---
+    sidebarList.addEventListener('click', function (e) {
+      var link = e.target.closest('[data-file]');
+      if (!link) return;
+      e.preventDefault();
+      var idx = parseInt(link.getAttribute('data-idx'), 10);
+      loadLecture(idx);
+      closeMobileSidebar();
+    });
+
+    // --- Кнопки навигации ---
+    btnPrev.addEventListener('click', function () {
+      if (currentIdx > 0) loadLecture(currentIdx - 1);
+    });
+    btnNext.addEventListener('click', function () {
+      if (currentIdx < LECTURES.length - 1) loadLecture(currentIdx + 1);
+    });
+
+    // --- Скачать лекцию (.docx) ---
+    var downloadLabel = btnDownload ? btnDownload.textContent : '';
+    btnDownload.addEventListener('click', function () {
+      if (currentIdx < 0) return;
+      var lec = LECTURES[currentIdx];
+      var b64 = (window.LECTURE_FILES || {})[lec.file];
+      if (!b64) return;
+      var blob = new Blob([b64ToArrayBuffer(b64)], {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = lec.file;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      btnDownload.textContent = 'Скачано';
+      window.setTimeout(function () { btnDownload.textContent = downloadLabel; }, 1800);
+    });
+
+    // --- Загрузка лекции ---
+    function loadLecture(idx) {
+      if (idx < 0 || idx >= LECTURES.length) return;
+      var lec = LECTURES[idx];
+      currentIdx = idx;
+      lastFailFile = lec.file;
+
+      // Подсветить активную в сайдбаре
+      sidebarList.querySelectorAll('[data-file]').forEach(function (a) {
+        a.classList.toggle('is-active', parseInt(a.getAttribute('data-idx'), 10) === idx);
+      });
+      // Прокрутить к активной
+      var activeLink = sidebarList.querySelector('.is-active');
+      if (activeLink) activeLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+      // Показать загрузку
+      welcome.style.display = 'none';
+      docEl.classList.remove('is-visible');
+      errorEl.classList.remove('is-visible');
+      loading.classList.add('is-visible');
+      window.scrollTo(0, 0);
+
+      // Обновить URL hash без перехода
+      history.replaceState(null, '', '#lec-' + idx);
+
+      ensureLectureLoaded(idx, function (loadErr) {
+        if (loadErr) {
+          loading.classList.remove('is-visible');
+          errorMsg.textContent = 'Не удалось загрузить: ' + lec.title + ' (' + loadErr.message + ')';
+          errorEl.classList.add('is-visible');
+          return;
+        }
+        var b64 = (window.LECTURE_FILES || {})[lec.file];
+        mammoth.convertToHtml({ arrayBuffer: b64ToArrayBuffer(b64) })
+          .then(function (result) {
+            loading.classList.remove('is-visible');
+            docTitle.textContent   = lec.title;
+            docMeta.textContent    = 'Файл: ' + lec.file;
+            docContent.innerHTML   = result.value;
+            docEl.classList.add('is-visible');
+            updateNav(idx);
+          })
+          .catch(function (err) {
+            loading.classList.remove('is-visible');
+            errorMsg.textContent = 'Не удалось отобразить: ' + lec.title + ' (' + err.message + ')';
+            errorEl.classList.add('is-visible');
+          });
+      });
+    }
+
+    function updateNav(idx) {
+      navInfo.textContent = (idx + 1) + ' / ' + LECTURES.length;
+      if (idx <= 0) btnPrev.setAttribute('data-disabled', '1');
+      else btnPrev.removeAttribute('data-disabled');
+      if (idx >= LECTURES.length - 1) btnNext.setAttribute('data-disabled', '1');
+      else btnNext.removeAttribute('data-disabled');
+    }
+
+    // --- Повтор при ошибке ---
+    window.readerRetry = function () {
+      if (currentIdx >= 0) loadLecture(currentIdx);
+    };
+
+    // --- Восстановить из hash ---
+    var hash = window.location.hash;
+    var m = hash.match(/^#lec-(\d+)$/);
+    if (m) {
+      var idx = parseInt(m[1], 10);
+      if (idx >= 0 && idx < LECTURES.length) loadLecture(idx);
+    }
+
+  })();
+  </script>
+</body>
+</html>

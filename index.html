@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ЭУМК (электронный учебно-методический комплекс) «Веб-программирование на стороне сервера» — теория, практические работы, раздел контроля и вспомогательные материалы.">
+  <title>ЭУМК «Веб-программирование на стороне сервера»</title>
+    <link rel="icon" type="image/png" href="img/logo-pgktit.png">
+  <link rel="stylesheet" href="css/style.css?v=3">
+</head>
+<body>
+
+  <!-- ШАПКА -->
+  <header class="site-header">
+    <div class="container header__inner">
+      <a class="brand" href="index.html" aria-label="На главную страницу">
+        <img class="brand__logo brand__logo--img" src="img/logo-pgktit.png" alt="" aria-hidden="true">
+        <h1 class="brand__text">
+          <span class="brand__badge">ЭУМК</span>
+          <span class="brand__title">«Веб-программирование на&nbsp;стороне&nbsp;сервера»</span>
+          <span class="brand__subtitle">Электронный учебно-методический комплекс</span>
+        </h1>
+      </a>
+
+      <div class="toolbar">
+        <button class="tool-btn tool-btn--a11y" type="button" id="a11y-toggle" aria-pressed="false" title="Версия для слабовидящих">
+          <span class="tool-btn__ico tool-btn__ico--eye" aria-hidden="true"></span>
+          <span class="tool-btn__txt">Для слабовидящих</span>
+        </button>
+        <button class="tool-btn tool-btn--theme" type="button" id="theme-toggle" aria-pressed="false" title="Переключить тему" aria-label="Переключить тему">
+          <span class="tool-btn__ico tool-btn__ico--moon" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav">
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+      </button>
+    </div>
+
+    <div class="container header__nav">
+      <nav class="nav" id="main-nav" aria-label="Основное меню">
+        <ul class="nav__list">
+          <li><a class="nav__link nav__link--active" href="index.html">Главная</a></li>
+          <li><a class="nav__link" href="theory-reader.html">Теория</a></li>
+          <li><a class="nav__link" href="practice-reader.html">Практика</a></li>
+          <li><a class="nav__link" href="control-reader.html">Контроль</a></li>
+          <li><a class="nav__link" href="extra.html">Материалы</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ОСНОВНОЕ СОДЕРЖИМОЕ -->
+  <main class="site-main">
+    <div class="container">
+
+      <section class="sections" aria-label="Разделы пособия">
+
+        <!-- 1. Теоретический раздел -->
+        <div class="section" id="section-theory">
+          <button class="section-btn" type="button" aria-expanded="false" aria-controls="docs-theory">
+            <span class="section-btn__label">Теоретический раздел</span>
+          </button>
+
+          <div class="section-docs" id="docs-theory">
+            <div class="section-docs__inner">
+              <p class="section-docs__title">Выберите лекцию</p>
+              <ul class="doc-list">
+                <li><a class="doc-link" href="viewer.html?file=1%20%D0%9E%D0%B1%D0%B7%D0%BE%D1%80%20%D1%82%D0%B5%D1%85%D0%BD%D0%BE%D0%BB%D0%BE%D0%B3%D0%B8%D0%B9%20%D1%81%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D1%8F%20%D0%B2%D0%B5%D0%B1.docx">
+                  <span class="doc-link__num">1</span>
+                  <span class="doc-link__text">Обзор технологий создания веб-приложений</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=2_%D0%9C%D0%B5%D1%85%D0%B0%D0%BD%D0%B8%D0%B7%D0%BC_%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D1%8B_%D0%B2%D0%B5%D0%B1_%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B0_%D0%9D%D0%B0%D0%B7%D0%BD%D0%B0%D1%87%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%B0_HTTP.docx">
+                  <span class="doc-link__num">2</span>
+                  <span class="doc-link__text">Механизм работы веб-сервера. Назначение протокола HTTP</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=3%20%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0%20%D0%B8%20%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0%20%D0%B2%D0%B5%D0%B1.docx">
+                  <span class="doc-link__num">3</span>
+                  <span class="doc-link__text">Установка и настройка веб-сервера</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=4%20%D0%9E%D1%81%D0%BD%D0%BE%D0%B2%D1%8B%20%D1%81%D0%B8%D0%BD%D1%82%D0%B0%D0%BA%D1%81%D0%B8%D1%81%D0%B0%20PHP.docx">
+                  <span class="doc-link__num">4</span>
+                  <span class="doc-link__text">Основы синтаксиса PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=5%20%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%20%D1%81%20%D0%BC%D0%B0%D1%81%D1%81%D0%B8%D0%B2%D0%B0%D0%BC%D0%B8%20%D0%B8%20%D1%81%D1%82%D1%80%D0%BE%D0%BA%D0%B0%D0%BC%D0%B8.docx">
+                  <span class="doc-link__num">5</span>
+                  <span class="doc-link__text">Работа с массивами и строками</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=5_1_%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0_%D1%81_%D0%BC%D0%B0%D1%81%D1%81%D0%B8%D0%B2%D0%B0%D0%BC%D0%B8_%D0%B8_%D1%81%D1%82%D1%80%D0%BE%D0%BA%D0%B0%D0%BC%D0%B8_%D0%B2_%D0%A0%D0%9D%D0%A0.docx">
+                  <span class="doc-link__num">5.1</span>
+                  <span class="doc-link__text">Работа с массивами и строками в PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=6%20%D0%A3%D1%81%D0%BB%D0%BE%D0%B2%D0%B8%D1%8F.docx">
+                  <span class="doc-link__num">6</span>
+                  <span class="doc-link__text">Условия и ветвление</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=6_1%20%D0%A1%D1%82%D0%B0%D0%BD%D0%B4%D0%B0%D1%80%D1%82%D0%BD%D1%8B%D0%B5%20%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D0%B8%20PHP.docx">
+                  <span class="doc-link__num">6.1</span>
+                  <span class="doc-link__text">Стандартные функции PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=7%20%D0%97%D0%B0%D0%BF%D1%80%D0%BE%D1%81%D1%8B%20get%20%D0%B8%20post.docx">
+                  <span class="doc-link__num">7</span>
+                  <span class="doc-link__text">Запросы GET и POST</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=8_%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0_%D1%81_%D1%84%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2%D0%BE%D0%B9_%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D0%BE%D0%B9_%D1%81_%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E_%D1%8F%D0%B7%D1%8B%D0%BA%D0%B0_PHP.docx">
+                  <span class="doc-link__num">8</span>
+                  <span class="doc-link__text">Работа с файловой системой в PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=9%20%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F%20%D1%81%D0%B5%D1%81%D1%81%D0%B8%D0%B8.docx">
+                  <span class="doc-link__num">9</span>
+                  <span class="doc-link__text">Организация сессии</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=10%20%D0%A4%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D0%B8.docx">
+                  <span class="doc-link__num">10</span>
+                  <span class="doc-link__text">Функции в PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=11%20%D0%9E%D0%9E%D0%9F.docx">
+                  <span class="doc-link__num">11</span>
+                  <span class="doc-link__text">Основы ООП в PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=12%20%D0%9A%D0%BB%D0%B0%D1%81%D1%81%D1%8B%20%D0%B8%20%D0%BE%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%D1%8B%20%D0%B2%20PHP.docx">
+                  <span class="doc-link__num">12</span>
+                  <span class="doc-link__text">Классы и объекты в PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=13%20%D0%A2%D1%80%D0%B5%D0%B9%D1%82%D1%8B.docx">
+                  <span class="doc-link__num">13</span>
+                  <span class="doc-link__text">Трейты в PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=14%20%D0%9A%D0%BB%D0%B8%D0%B5%D0%BD%D1%82.docx">
+                  <span class="doc-link__num">14</span>
+                  <span class="doc-link__text">Клиентская часть веб-приложений</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=15%20%D0%92%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%B2%20Node.docx">
+                  <span class="doc-link__num">15</span>
+                  <span class="doc-link__text">Введение в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=16.1%20%D0%9F%D0%B0%D0%BA%D0%B5%D1%82%D0%BD%D1%8B%D0%B9%20%D0%BC%D0%B5%D0%BD%D0%B5%D0%B4%D0%B6%D0%B5%D1%80%20npm%20%D0%B8%20%D1%83%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BF%D0%B0%D0%BA%D0%B5%D1%82%D0%B0%D0%BC%D0%B8.docx">
+                  <span class="doc-link__num">16.1</span>
+                  <span class="doc-link__text">Пакетный менеджер npm и управление пакетами</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=16.2%20%D0%9E%D0%B1%D1%89%D0%B8%D0%B5%20%D1%81%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D1%8F%20%D0%BE%20NPM.docx">
+                  <span class="doc-link__num">16.2</span>
+                  <span class="doc-link__text">Общие сведения о NPM</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=17%20%D0%A6%D0%B8%D0%BA%D0%BB%20%D1%81%D0%BE%D0%B1%D1%8B%D1%82%D0%B8%D0%B9.docx">
+                  <span class="doc-link__num">17</span>
+                  <span class="doc-link__text">Цикл событий (Event Loop) в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=18%20%D0%90%D1%81%D0%B8%D0%BD%D1%85%D1%80%D0%BE%D0%BD%D0%BD%D0%BE%D0%B5%20%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5%20%D0%B2%20Node.docx">
+                  <span class="doc-link__num">18</span>
+                  <span class="doc-link__text">Асинхронное программирование в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=19%20%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%20%D1%81%20%D1%84%D0%B0%D0%B9%D0%BB%D0%B0%D0%BC%D0%B8.docx">
+                  <span class="doc-link__num">19</span>
+                  <span class="doc-link__text">Работа с файлами в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=19.1%20%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%20%D1%81%20%D1%84%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2%D0%BE%D0%B9%20%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D0%BE%D0%B9%20%D0%B2%20Node.docx">
+                  <span class="doc-link__num">19.1</span>
+                  <span class="doc-link__text">Работа с файловой системой в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=20%20%D0%A1%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D1%8F%20%D0%BE%20HTTP.docx">
+                  <span class="doc-link__num">20</span>
+                  <span class="doc-link__text">Сведения о протоколе HTTP</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=20.1%20%D0%A1%D0%B5%D1%80%D0%B2%D0%B5%D1%80.docx">
+                  <span class="doc-link__num">20.1</span>
+                  <span class="doc-link__text">Создание HTTP-сервера на Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=21%20%D0%A1%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%BD%D1%8B%D0%B5%20%D1%84%D1%80%D0%B5%D0%B9%D0%BC%D0%B2%D0%BE%D1%80%D0%BA%D0%B8%20Koa.docx">
+                  <span class="doc-link__num">21</span>
+                  <span class="doc-link__text">Серверные фреймворки: Koa</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=22%20%D0%9F%D0%BE%D0%BD%D1%8F%D1%82%D0%B8%D0%B5%20%D0%BE%20CLI.docx">
+                  <span class="doc-link__num">22</span>
+                  <span class="doc-link__text">Понятие о CLI</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=23%20%D0%9C%D0%BE%D0%B4%D1%83%D0%BB%D0%B8%20OS.docx">
+                  <span class="doc-link__num">23</span>
+                  <span class="doc-link__text">Модули OS в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=24%20%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%20%D1%81%20%D0%BF%D0%BE%D1%82%D0%BE%D0%BA%D0%B0%D0%BC%D0%B8%20.docx">
+                  <span class="doc-link__num">24</span>
+                  <span class="doc-link__text">Работа с потоками (Streams) в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="viewer.html?file=25%20Node.js_%D0%91%D0%B0%D0%B7%D1%8B_%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85.docx">
+                  <span class="doc-link__num">25</span>
+                  <span class="doc-link__text">Node.js и базы данных</span>
+                </a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Практический раздел -->
+        <div class="section" id="section-practice">
+          <button class="section-btn" type="button" aria-expanded="false" aria-controls="docs-practice">
+            <span class="section-btn__label">Практический раздел</span>
+          </button>
+
+          <div class="section-docs" id="docs-practice">
+            <div class="section-docs__inner">
+              <p class="section-docs__title">Выберите документ</p>
+              <ul class="doc-list">
+                <li><a class="doc-link" href="practice-reader.html#lec-0">
+                  <span class="doc-link__num">1</span>
+                  <span class="doc-link__text">Установка Apache и PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-1">
+                  <span class="doc-link__num">2</span>
+                  <span class="doc-link__text">Простейшие скрипты на PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-2">
+                  <span class="doc-link__num">3</span>
+                  <span class="doc-link__text">Простейшие скрипты на PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-3">
+                  <span class="doc-link__num">4</span>
+                  <span class="doc-link__text">Чтение и запись файлов на PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-4">
+                  <span class="doc-link__num">5</span>
+                  <span class="doc-link__text">Веб-приложение на PHP с сессиями</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-5">
+                  <span class="doc-link__num">6</span>
+                  <span class="doc-link__text">Функциональный подход в PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-6">
+                  <span class="doc-link__num">7</span>
+                  <span class="doc-link__text">Исключения в PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-7">
+                  <span class="doc-link__num">8</span>
+                  <span class="doc-link__text">Трейты и пространства имён в PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-8">
+                  <span class="doc-link__num">9</span>
+                  <span class="doc-link__text">БД и PHPMyAdmin</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-9">
+                  <span class="doc-link__num">10</span>
+                  <span class="doc-link__text">Клиент-серверное приложение на PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-10">
+                  <span class="doc-link__num">11</span>
+                  <span class="doc-link__text">Установка Node.js и NPM</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-11">
+                  <span class="doc-link__num">12</span>
+                  <span class="doc-link__text">Таймеры в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-12">
+                  <span class="doc-link__num">13</span>
+                  <span class="doc-link__text">Колбэки в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-13">
+                  <span class="doc-link__num">14</span>
+                  <span class="doc-link__text">Файловая система в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-14">
+                  <span class="doc-link__num">15</span>
+                  <span class="doc-link__text">Простой сервер на Koa.js</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-15">
+                  <span class="doc-link__num">16</span>
+                  <span class="doc-link__text">Простой сервер на Express.js</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-16">
+                  <span class="doc-link__num">17</span>
+                  <span class="doc-link__text">CLI-приложения</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-17">
+                  <span class="doc-link__num">18</span>
+                  <span class="doc-link__text">Модуль OS</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-18">
+                  <span class="doc-link__num">19</span>
+                  <span class="doc-link__text">Модуль Events</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-19">
+                  <span class="doc-link__num">20</span>
+                  <span class="doc-link__text">Маршрутизация (HTTP Request)</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-20">
+                  <span class="doc-link__num">21</span>
+                  <span class="doc-link__text">Потоки (streams) в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-21">
+                  <span class="doc-link__num">22</span>
+                  <span class="doc-link__text">MySQL в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-22">
+                  <span class="doc-link__num">23</span>
+                  <span class="doc-link__text">MongoDB в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="practice-reader.html#lec-23">
+                  <span class="doc-link__num">24</span>
+                  <span class="doc-link__text">REST API (MongoDB и Koa.js)</span>
+                </a></li>
+                <li><a class="doc-link" href="файлы%20практики/Лабораторный%20практикум%20по%20ВП.docx" download>
+                  <span class="doc-link__num">П</span>
+                  <span class="doc-link__text">Полный лабораторный практикум (скачать, 2,7 МБ)</span>
+                </a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Раздел контроля -->
+        <div class="section" id="section-control">
+          <button class="section-btn" type="button" aria-expanded="false" aria-controls="docs-control">
+            <span class="section-btn__label">Раздел контроля</span>
+          </button>
+
+          <div class="section-docs" id="docs-control">
+            <div class="section-docs__inner">
+              <p class="section-docs__title">Выберите документ</p>
+              <ul class="doc-list">
+                <li><a class="doc-link" href="control-reader.html#exam">
+                  <span class="doc-link__num">К</span>
+                  <span class="doc-link__text">Обязательная контрольная работа</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-0">
+                  <span class="doc-link__num">1</span>
+                  <span class="doc-link__text">Обзор технологий создания веб</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-1">
+                  <span class="doc-link__num">2</span>
+                  <span class="doc-link__text">Веб-сервер и HTTP</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-2">
+                  <span class="doc-link__num">3</span>
+                  <span class="doc-link__text">Установка и настройка веб-сервера</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-3">
+                  <span class="doc-link__num">4</span>
+                  <span class="doc-link__text">Основы синтаксиса PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-4">
+                  <span class="doc-link__num">5</span>
+                  <span class="doc-link__text">Массивы и строки (основы)</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-5">
+                  <span class="doc-link__num">5.1</span>
+                  <span class="doc-link__text">Массивы и строки (функции)</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-6">
+                  <span class="doc-link__num">6</span>
+                  <span class="doc-link__text">Условия и ветвление</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-7">
+                  <span class="doc-link__num">6.1</span>
+                  <span class="doc-link__text">Стандартные функции PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-8">
+                  <span class="doc-link__num">7</span>
+                  <span class="doc-link__text">Запросы GET и POST</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-9">
+                  <span class="doc-link__num">8</span>
+                  <span class="doc-link__text">Файловая система в PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-10">
+                  <span class="doc-link__num">9</span>
+                  <span class="doc-link__text">Сессии и cookie</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-11">
+                  <span class="doc-link__num">10</span>
+                  <span class="doc-link__text">Функции в PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-12">
+                  <span class="doc-link__num">11</span>
+                  <span class="doc-link__text">Основы ООП в PHP</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-13">
+                  <span class="doc-link__num">12</span>
+                  <span class="doc-link__text">Классы и объекты</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-14">
+                  <span class="doc-link__num">13</span>
+                  <span class="doc-link__text">Трейты</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-15">
+                  <span class="doc-link__num">14</span>
+                  <span class="doc-link__text">Клиентская часть</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-16">
+                  <span class="doc-link__num">15</span>
+                  <span class="doc-link__text">Введение в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-17">
+                  <span class="doc-link__num">16.1</span>
+                  <span class="doc-link__text">npm и управление пакетами</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-18">
+                  <span class="doc-link__num">16.2</span>
+                  <span class="doc-link__text">Общие сведения о NPM</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-19">
+                  <span class="doc-link__num">17</span>
+                  <span class="doc-link__text">Цикл событий</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-20">
+                  <span class="doc-link__num">18</span>
+                  <span class="doc-link__text">Асинхронное программирование</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-21">
+                  <span class="doc-link__num">19</span>
+                  <span class="doc-link__text">Работа с файлами</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-22">
+                  <span class="doc-link__num">19.1</span>
+                  <span class="doc-link__text">Файловая система в Node.js</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-23">
+                  <span class="doc-link__num">20</span>
+                  <span class="doc-link__text">Протокол HTTP</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-24">
+                  <span class="doc-link__num">20.1</span>
+                  <span class="doc-link__text">HTTP-сервер</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-25">
+                  <span class="doc-link__num">21</span>
+                  <span class="doc-link__text">Фреймворки Koa и Express</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-26">
+                  <span class="doc-link__num">22</span>
+                  <span class="doc-link__text">Понятие о CLI</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-27">
+                  <span class="doc-link__num">23</span>
+                  <span class="doc-link__text">Модули OS и HTTP</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-28">
+                  <span class="doc-link__num">24</span>
+                  <span class="doc-link__text">Потоки</span>
+                </a></li>
+                <li><a class="doc-link" href="control-reader.html#test-29">
+                  <span class="doc-link__num">25</span>
+                  <span class="doc-link__text">Node.js и базы данных</span>
+                </a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Вспомогательный раздел -->
+        <div class="section" id="section-extra">
+          <button class="section-btn" type="button" aria-expanded="false" aria-controls="docs-extra">
+            <span class="section-btn__label">Вспомогательный раздел</span>
+          </button>
+
+          <div class="section-docs" id="docs-extra">
+            <div class="section-docs__inner">
+              <p class="section-docs__title">Выберите документ</p>
+              <ul class="doc-list">
+                <li><a class="doc-link" href="docs/extra-1.html">
+                  <span class="doc-link__num">1</span>
+                  <span class="doc-link__text">Глоссарий терминов</span>
+                </a></li>
+                <li><a class="doc-link" href="docs/extra-2.html">
+                  <span class="doc-link__num">2</span>
+                  <span class="doc-link__text">Полезные ссылки и литература</span>
+                </a></li>
+                <li><a class="doc-link" href="docs/extra-3.html">
+                  <span class="doc-link__num">3</span>
+                  <span class="doc-link__text">Примеры готового кода</span>
+                </a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ПОДВАЛ -->
+  <footer class="site-footer">
+    <div class="container footer__inner">
+      <span class="footer__badge">ЭУМК</span>
+      <p class="footer__text">Электронный учебно-методический комплекс «Веб-программирование на стороне сервера»</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

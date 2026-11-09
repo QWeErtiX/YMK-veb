@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Теоретический раздел — ЭУМК «Веб-программирование на стороне сервера»</title>
+  <link rel="icon" type="image/png" href="img/logo-pgktit.png">
+  <link rel="stylesheet" href="css/style.css?v=3">
+  <style>
+    /* ---- Модальное окно со списком лекций ---- */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(10, 14, 40, .55);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.is-open {
+      display: flex;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 24px 60px rgba(10,14,40,.30);
+      width: 100%;
+      max-width: 680px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    body.theme-dark .modal {
+      background: #1a2140;
+      border: 1px solid #2c3560;
+    }
+    .modal__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 28px 18px;
+      border-bottom: 2px solid #dfe5f4;
+      flex-shrink: 0;
+    }
+    body.theme-dark .modal__head {
+      border-color: #2c3560;
+    }
+    .modal__title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #141936;
+      margin: 0;
+    }
+    body.theme-dark .modal__title {
+      color: #e9ecf8;
+    }
+    .modal__close {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid #dfe5f4;
+      background: transparent;
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+      color: #59608a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .2s, color .2s;
+    }
+    .modal__close:hover {
+      background: #f0f0f8;
+      color: #141936;
+    }
+    body.theme-dark .modal__close {
+      border-color: #2c3560;
+      color: #a3aac8;
+    }
+    body.theme-dark .modal__close:hover {
+      background: #2c3560;
+      color: #e9ecf8;
+    }
+    .modal__body {
+      overflow-y: auto;
+      padding: 18px 28px 24px;
+      /* белый фон списка лекций */
+      background: #fff;
+    }
+    body.theme-dark .modal__body {
+      background: #1a2140;
+    }
+    .modal__list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .modal__item a {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: #141936;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+      transition: background .18s, border-color .18s;
+      background: #f7f9ff;
+    }
+    .modal__item a:hover {
+      background: #e9fbfa;
+      border-color: #0e9f9a;
+      color: #0b7f7b;
+    }
+    body.theme-dark .modal__item a {
+      background: #232c56;
+      color: #e9ecf8;
+      border-color: transparent;
+    }
+    body.theme-dark .modal__item a:hover {
+      background: #10312f;
+      border-color: #0e9f9a;
+      color: #2ec9c2;
+    }
+    .modal__num {
+      flex-shrink: 0;
+      min-width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0e9f9a, #4f46e5);
+      color: #fff;
+      font-size: 0.82rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: .01em;
+    }
+
+    /* ---- Кнопки-триггеры для открытия модалок ---- */
+    .theory-triggers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 28px;
+    }
+    .trigger-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 24px;
+      border-radius: 14px;
+      border: 2px solid #dfe5f4;
+      background: #f7f9ff;
+      color: #141936;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s, border-color .2s, color .2s, box-shadow .2s;
+      box-shadow: 0 4px 12px rgba(23,30,77,.07);
+    }
+    .trigger-btn:hover {
+      background: #e9fbfa;
+      border-color: #0e9f9a;
+      color: #0b7f7b;
+      box-shadow: 0 6px 18px rgba(14,159,154,.14);
+    }
+    body.theme-dark .trigger-btn {
+      background: #1a2140;
+      border-color: #2c3560;
+      color: #e9ecf8;
+    }
+    body.theme-dark .trigger-btn:hover {
+      background: #10312f;
+      border-color: #0e9f9a;
+      color: #2ec9c2;
+    }
+    .trigger-btn__ico {
+      font-size: 1.3rem;
+    }
+
+    /* a11y mode */
+    body.a11y .modal {
+      background: #000 !important;
+      border: 2px solid #ffe600 !important;
+    }
+    body.a11y .modal__head {
+      border-color: #ffe600 !important;
+    }
+    body.a11y .modal__title { color: #ffe600 !important; }
+    body.a11y .modal__close {
+      background: #000 !important;
+      border-color: #ffe600 !important;
+      color: #ffe600 !important;
+    }
+    body.a11y .modal__body { background: #000 !important; }
+    body.a11y .modal__item a {
+      background: #000 !important;
+      border-color: #ffe600 !important;
+      color: #ffe600 !important;
+    }
+    body.a11y .modal__item a:hover {
+      background: #ffe600 !important;
+      color: #000 !important;
+    }
+    body.a11y .modal__num {
+      background: #ffe600 !important;
+      color: #000 !important;
+    }
+    body.a11y .trigger-btn {
+      background: #000 !important;
+      border-color: #ffe600 !important;
+      color: #ffe600 !important;
+    }
+    body.a11y .trigger-btn:hover {
+      background: #ffe600 !important;
+      color: #000 !important;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header__inner">
+      <a class="brand" href="index.html" aria-label="На главную страницу">
+        <img class="brand__logo brand__logo--img" src="img/logo-pgktit.png" alt="" aria-hidden="true">
+        <h1 class="brand__text">
+          <span class="brand__badge">ЭУМК</span>
+          <span class="brand__title">«Веб-программирование на&nbsp;стороне&nbsp;сервера»</span>
+          <span class="brand__subtitle">Электронный учебно-методический комплекс</span>
+        </h1>
+      </a>
+      <div class="toolbar">
+        <button class="tool-btn tool-btn--a11y" type="button" id="a11y-toggle" aria-pressed="false" title="Версия для слабовидящих">
+          <span class="tool-btn__ico tool-btn__ico--eye" aria-hidden="true"></span>
+          <span class="tool-btn__txt">Для слабовидящих</span>
+        </button>
+        <button class="tool-btn tool-btn--theme" type="button" id="theme-toggle" aria-pressed="false" title="Переключить тему" aria-label="Переключить тему">
+          <span class="tool-btn__ico tool-btn__ico--moon" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav">
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+      </button>
+    </div>
+    <div class="container header__nav">
+      <nav class="nav" id="main-nav" aria-label="Основное меню">
+        <ul class="nav__list">
+          <li><a class="nav__link" href="index.html">Главная</a></li>
+          <li><a class="nav__link nav__link--active" href="theory-reader.html">Теория</a></li>
+          <li><a class="nav__link" href="practice-reader.html">Практика</a></li>
+          <li><a class="nav__link" href="control-reader.html">Контроль</a></li>
+          <li><a class="nav__link" href="extra.html">Материалы</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      <section class="page-content">
+        <h2>Теоретический раздел</h2>
+        <p>Выберите группу лекций для просмотра:</p>
+
+        <div class="theory-triggers">
+          <button class="trigger-btn" type="button" data-modal="modal-php">
+            <span class="trigger-btn__ico"></span>
+            Лекции по PHP (1–14)
+          </button>
+          <button class="trigger-btn" type="button" data-modal="modal-node">
+            <span class="trigger-btn__ico"></span>
+            Лекции по Node.js (15–25)
+          </button>
+          <button class="trigger-btn" type="button" data-modal="modal-all">
+            <span class="trigger-btn__ico"></span>
+            Все лекции
+          </button>
+        </div>
+
+        <p style="margin-top: 32px;"><a class="link-back" href="index.html">← Вернуться на главную</a></p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__inner">
+      <span class="footer__badge">ЭУМК</span>
+      <p class="footer__text">Электронный учебно-методический комплекс «Веб-программирование на стороне сервера»</p>
+    </div>
+  </footer>
+
+  <!-- МОДАЛЬНОЕ ОКНО: PHP -->
+  <div class="modal-overlay" id="modal-php" role="dialog" aria-modal="true" aria-labelledby="modal-php-title">
+    <div class="modal">
+      <div class="modal__head">
+        <h2 class="modal__title" id="modal-php-title">Лекции по PHP</h2>
+        <button class="modal__close" type="button" aria-label="Закрыть">✕</button>
+      </div>
+      <div class="modal__body">
+        <ul class="modal__list">
+          <li class="modal__item"><a href="viewer.html?file=1%20%D0%9E%D0%B1%D0%B7%D0%BE%D1%80%20%D1%82%D0%B5%D1%85%D0%BD%D0%BE%D0%BB%D0%BE%D0%B3%D0%B8%D0%B9%20%D1%81%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D1%8F%20%D0%B2%D0%B5%D0%B1.docx"><span class="modal__num">1</span>Обзор технологий создания веб-приложений</a></li>
+          <li class="modal__item"><a href="viewer.html?file=2_%D0%9C%D0%B5%D1%85%D0%B0%D0%BD%D0%B8%D0%B7%D0%BC_%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D1%8B_%D0%B2%D0%B5%D0%B1_%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B0_%D0%9D%D0%B0%D0%B7%D0%BD%D0%B0%D1%87%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%B0_HTTP.docx"><span class="modal__num">2</span>Механизм работы веб-сервера. Назначение протокола HTTP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=3%20%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0%20%D0%B8%20%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0%20%D0%B2%D0%B5%D0%B1.docx"><span class="modal__num">3</span>Установка и настройка веб-сервера</a></li>
+          <li class="modal__item"><a href="viewer.html?file=4%20%D0%9E%D1%81%D0%BD%D0%BE%D0%B2%D1%8B%20%D1%81%D0%B8%D0%BD%D1%82%D0%B0%D0%BA%D1%81%D0%B8%D1%81%D0%B0%20PHP.docx"><span class="modal__num">4</span>Основы синтаксиса PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=5%20%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%20%D1%81%20%D0%BC%D0%B0%D1%81%D1%81%D0%B8%D0%B2%D0%B0%D0%BC%D0%B8%20%D0%B8%20%D1%81%D1%82%D1%80%D0%BE%D0%BA%D0%B0%D0%BC%D0%B8.docx"><span class="modal__num">5</span>Работа с массивами и строками</a></li>
+          <li class="modal__item"><a href="viewer.html?file=5_1_%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0_%D1%81_%D0%BC%D0%B0%D1%81%D1%81%D0%B8%D0%B2%D0%B0%D0%BC%D0%B8_%D0%B8_%D1%81%D1%82%D1%80%D0%BE%D0%BA%D0%B0%D0%BC%D0%B8_%D0%B2_%D0%A0%D0%9D%D0%A0.docx"><span class="modal__num">5.1</span>Работа с массивами и строками в PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=6%20%D0%A3%D1%81%D0%BB%D0%BE%D0%B2%D0%B8%D1%8F.docx"><span class="modal__num">6</span>Условия и ветвление</a></li>
+          <li class="modal__item"><a href="viewer.html?file=6_1%20%D0%A1%D1%82%D0%B0%D0%BD%D0%B4%D0%B0%D1%80%D1%82%D0%BD%D1%8B%D0%B5%20%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D0%B8%20PHP.docx"><span class="modal__num">6.1</span>Стандартные функции PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=7%20%D0%97%D0%B0%D0%BF%D1%80%D0%BE%D1%81%D1%8B%20get%20%D0%B8%20post.docx"><span class="modal__num">7</span>Запросы GET и POST</a></li>
+          <li class="modal__item"><a href="viewer.html?file=8_%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0_%D1%81_%D1%84%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2%D0%BE%D0%B9_%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D0%BE%D0%B9_%D1%81_%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E_%D1%8F%D0%B7%D1%8B%D0%BA%D0%B0_PHP.docx"><span class="modal__num">8</span>Работа с файловой системой в PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=9%20%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F%20%D1%81%D0%B5%D1%81%D1%81%D0%B8%D0%B8.docx"><span class="modal__num">9</span>Организация сессии</a></li>
+          <li class="modal__item"><a href="viewer.html?file=10%20%D0%A4%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D0%B8.docx"><span class="modal__num">10</span>Функции в PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=11%20%D0%9E%D0%9E%D0%9F.docx"><span class="modal__num">11</span>Основы ООП в PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=12%20%D0%9A%D0%BB%D0%B0%D1%81%D1%81%D1%8B%20%D0%B8%20%D0%BE%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%D1%8B%20%D0%B2%20PHP.docx"><span class="modal__num">12</span>Классы и объекты в PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=13%20%D0%A2%D1%80%D0%B5%D0%B9%D1%82%D1%8B.docx"><span class="modal__num">13</span>Трейты в PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=14%20%D0%9A%D0%BB%D0%B8%D0%B5%D0%BD%D1%82.docx"><span class="modal__num">14</span>Клиентская часть веб-приложений</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО: Node.js -->
+  <div class="modal-overlay" id="modal-node" role="dialog" aria-modal="true" aria-labelledby="modal-node-title">
+    <div class="modal">
+      <div class="modal__head">
+        <h2 class="modal__title" id="modal-node-title">Лекции по Node.js</h2>
+        <button class="modal__close" type="button" aria-label="Закрыть">✕</button>
+      </div>
+      <div class="modal__body">
+        <ul class="modal__list">
+          <li class="modal__item"><a href="viewer.html?file=15%20%D0%92%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%B2%20Node.docx"><span class="modal__num">15</span>Введение в Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=16.1%20%D0%9F%D0%B0%D0%BA%D0%B5%D1%82%D0%BD%D1%8B%D0%B9%20%D0%BC%D0%B5%D0%BD%D0%B5%D0%B4%D0%B6%D0%B5%D1%80%20npm%20%D0%B8%20%D1%83%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BF%D0%B0%D0%BA%D0%B5%D1%82%D0%B0%D0%BC%D0%B8.docx"><span class="modal__num">16.1</span>Пакетный менеджер npm и управление пакетами</a></li>
+          <li class="modal__item"><a href="viewer.html?file=16.2%20%D0%9E%D0%B1%D1%89%D0%B8%D0%B5%20%D1%81%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D1%8F%20%D0%BE%20NPM.docx"><span class="modal__num">16.2</span>Общие сведения о NPM</a></li>
+          <li class="modal__item"><a href="viewer.html?file=17%20%D0%A6%D0%B8%D0%BA%D0%BB%20%D1%81%D0%BE%D0%B1%D1%8B%D1%82%D0%B8%D0%B9.docx"><span class="modal__num">17</span>Цикл событий (Event Loop) в Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=18%20%D0%90%D1%81%D0%B8%D0%BD%D1%85%D1%80%D0%BE%D0%BD%D0%BD%D0%BE%D0%B5%20%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5%20%D0%B2%20Node.docx"><span class="modal__num">18</span>Асинхронное программирование в Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=19%20%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%20%D1%81%20%D1%84%D0%B0%D0%B9%D0%BB%D0%B0%D0%BC%D0%B8.docx"><span class="modal__num">19</span>Работа с файлами в Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=19.1%20%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%20%D1%81%20%D1%84%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2%D0%BE%D0%B9%20%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D0%BE%D0%B9%20%D0%B2%20Node.docx"><span class="modal__num">19.1</span>Работа с файловой системой в Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=20%20%D0%A1%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D1%8F%20%D0%BE%20HTTP.docx"><span class="modal__num">20</span>Сведения о протоколе HTTP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=20.1%20%D0%A1%D0%B5%D1%80%D0%B2%D0%B5%D1%80.docx"><span class="modal__num">20.1</span>Создание HTTP-сервера на Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=21%20%D0%A1%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%BD%D1%8B%D0%B5%20%D1%84%D1%80%D0%B5%D0%B9%D0%BC%D0%B2%D0%BE%D1%80%D0%BA%D0%B8%20Koa.docx"><span class="modal__num">21</span>Серверные фреймворки: Koa</a></li>
+          <li class="modal__item"><a href="viewer.html?file=22%20%D0%9F%D0%BE%D0%BD%D1%8F%D1%82%D0%B8%D0%B5%20%D0%BE%20CLI.docx"><span class="modal__num">22</span>Понятие о CLI</a></li>
+          <li class="modal__item"><a href="viewer.html?file=23%20%D0%9C%D0%BE%D0%B4%D1%83%D0%BB%D0%B8%20OS.docx"><span class="modal__num">23</span>Модули OS в Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=24%20%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%20%D1%81%20%D0%BF%D0%BE%D1%82%D0%BE%D0%BA%D0%B0%D0%BC%D0%B8%20.docx"><span class="modal__num">24</span>Работа с потоками (Streams) в Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=25%20Node.js_%D0%91%D0%B0%D0%B7%D1%8B_%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85.docx"><span class="modal__num">25</span>Node.js и базы данных</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО: Все лекции -->
+  <div class="modal-overlay" id="modal-all" role="dialog" aria-modal="true" aria-labelledby="modal-all-title">
+    <div class="modal">
+      <div class="modal__head">
+        <h2 class="modal__title" id="modal-all-title">Все лекции</h2>
+        <button class="modal__close" type="button" aria-label="Закрыть">✕</button>
+      </div>
+      <div class="modal__body">
+        <ul class="modal__list">
+          <li class="modal__item"><a href="viewer.html?file=1%20%D0%9E%D0%B1%D0%B7%D0%BE%D1%80%20%D1%82%D0%B5%D1%85%D0%BD%D0%BE%D0%BB%D0%BE%D0%B3%D0%B8%D0%B9%20%D1%81%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D1%8F%20%D0%B2%D0%B5%D0%B1.docx"><span class="modal__num">1</span>Обзор технологий создания веб-приложений</a></li>
+          <li class="modal__item"><a href="viewer.html?file=2_%D0%9C%D0%B5%D1%85%D0%B0%D0%BD%D0%B8%D0%B7%D0%BC_%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D1%8B_%D0%B2%D0%B5%D0%B1_%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B0_%D0%9D%D0%B0%D0%B7%D0%BD%D0%B0%D1%87%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%B0_HTTP.docx"><span class="modal__num">2</span>Механизм работы веб-сервера. Назначение протокола HTTP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=3%20%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0%20%D0%B8%20%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0%20%D0%B2%D0%B5%D0%B1.docx"><span class="modal__num">3</span>Установка и настройка веб-сервера</a></li>
+          <li class="modal__item"><a href="viewer.html?file=4%20%D0%9E%D1%81%D0%BD%D0%BE%D0%B2%D1%8B%20%D1%81%D0%B8%D0%BD%D1%82%D0%B0%D0%BA%D1%81%D0%B8%D1%81%D0%B0%20PHP.docx"><span class="modal__num">4</span>Основы синтаксиса PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=5%20%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%20%D1%81%20%D0%BC%D0%B0%D1%81%D1%81%D0%B8%D0%B2%D0%B0%D0%BC%D0%B8%20%D0%B8%20%D1%81%D1%82%D1%80%D0%BE%D0%BA%D0%B0%D0%BC%D0%B8.docx"><span class="modal__num">5</span>Работа с массивами и строками</a></li>
+          <li class="modal__item"><a href="viewer.html?file=5_1_%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0_%D1%81_%D0%BC%D0%B0%D1%81%D1%81%D0%B8%D0%B2%D0%B0%D0%BC%D0%B8_%D0%B8_%D1%81%D1%82%D1%80%D0%BE%D0%BA%D0%B0%D0%BC%D0%B8_%D0%B2_%D0%A0%D0%9D%D0%A0.docx"><span class="modal__num">5.1</span>Работа с массивами и строками в PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=6%20%D0%A3%D1%81%D0%BB%D0%BE%D0%B2%D0%B8%D1%8F.docx"><span class="modal__num">6</span>Условия и ветвление</a></li>
+          <li class="modal__item"><a href="viewer.html?file=6_1%20%D0%A1%D1%82%D0%B0%D0%BD%D0%B4%D0%B0%D1%80%D1%82%D0%BD%D1%8B%D0%B5%20%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D0%B8%20PHP.docx"><span class="modal__num">6.1</span>Стандартные функции PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=7%20%D0%97%D0%B0%D0%BF%D1%80%D0%BE%D1%81%D1%8B%20get%20%D0%B8%20post.docx"><span class="modal__num">7</span>Запросы GET и POST</a></li>
+          <li class="modal__item"><a href="viewer.html?file=8_%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0_%D1%81_%D1%84%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2%D0%BE%D0%B9_%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D0%BE%D0%B9_%D1%81_%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E_%D1%8F%D0%B7%D1%8B%D0%BA%D0%B0_PHP.docx"><span class="modal__num">8</span>Работа с файловой системой в PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=9%20%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F%20%D1%81%D0%B5%D1%81%D1%81%D0%B8%D0%B8.docx"><span class="modal__num">9</span>Организация сессии</a></li>
+          <li class="modal__item"><a href="viewer.html?file=10%20%D0%A4%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D0%B8.docx"><span class="modal__num">10</span>Функции в PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=11%20%D0%9E%D0%9E%D0%9F.docx"><span class="modal__num">11</span>Основы ООП в PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=12%20%D0%9A%D0%BB%D0%B0%D1%81%D1%81%D1%8B%20%D0%B8%20%D0%BE%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%D1%8B%20%D0%B2%20PHP.docx"><span class="modal__num">12</span>Классы и объекты в PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=13%20%D0%A2%D1%80%D0%B5%D0%B9%D1%82%D1%8B.docx"><span class="modal__num">13</span>Трейты в PHP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=14%20%D0%9A%D0%BB%D0%B8%D0%B5%D0%BD%D1%82.docx"><span class="modal__num">14</span>Клиентская часть веб-приложений</a></li>
+          <li class="modal__item"><a href="viewer.html?file=15%20%D0%92%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%B2%20Node.docx"><span class="modal__num">15</span>Введение в Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=16.1%20%D0%9F%D0%B0%D0%BA%D0%B5%D1%82%D0%BD%D1%8B%D0%B9%20%D0%BC%D0%B5%D0%BD%D0%B5%D0%B4%D0%B6%D0%B5%D1%80%20npm%20%D0%B8%20%D1%83%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BF%D0%B0%D0%BA%D0%B5%D1%82%D0%B0%D0%BC%D0%B8.docx"><span class="modal__num">16.1</span>Пакетный менеджер npm и управление пакетами</a></li>
+          <li class="modal__item"><a href="viewer.html?file=16.2%20%D0%9E%D0%B1%D1%89%D0%B8%D0%B5%20%D1%81%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D1%8F%20%D0%BE%20NPM.docx"><span class="modal__num">16.2</span>Общие сведения о NPM</a></li>
+          <li class="modal__item"><a href="viewer.html?file=17%20%D0%A6%D0%B8%D0%BA%D0%BB%20%D1%81%D0%BE%D0%B1%D1%8B%D1%82%D0%B8%D0%B9.docx"><span class="modal__num">17</span>Цикл событий (Event Loop) в Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=18%20%D0%90%D1%81%D0%B8%D0%BD%D1%85%D1%80%D0%BE%D0%BD%D0%BD%D0%BE%D0%B5%20%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5%20%D0%B2%20Node.docx"><span class="modal__num">18</span>Асинхронное программирование в Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=19%20%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%20%D1%81%20%D1%84%D0%B0%D0%B9%D0%BB%D0%B0%D0%BC%D0%B8.docx"><span class="modal__num">19</span>Работа с файлами в Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=19.1%20%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%20%D1%81%20%D1%84%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2%D0%BE%D0%B9%20%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D0%BE%D0%B9%20%D0%B2%20Node.docx"><span class="modal__num">19.1</span>Работа с файловой системой в Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=20%20%D0%A1%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D1%8F%20%D0%BE%20HTTP.docx"><span class="modal__num">20</span>Сведения о протоколе HTTP</a></li>
+          <li class="modal__item"><a href="viewer.html?file=20.1%20%D0%A1%D0%B5%D1%80%D0%B2%D0%B5%D1%80.docx"><span class="modal__num">20.1</span>Создание HTTP-сервера на Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=21%20%D0%A1%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%BD%D1%8B%D0%B5%20%D1%84%D1%80%D0%B5%D0%B9%D0%BC%D0%B2%D0%BE%D1%80%D0%BA%D0%B8%20Koa.docx"><span class="modal__num">21</span>Серверные фреймворки: Koa</a></li>
+          <li class="modal__item"><a href="viewer.html?file=22%20%D0%9F%D0%BE%D0%BD%D1%8F%D1%82%D0%B8%D0%B5%20%D0%BE%20CLI.docx"><span class="modal__num">22</span>Понятие о CLI</a></li>
+          <li class="modal__item"><a href="viewer.html?file=23%20%D0%9C%D0%BE%D0%B4%D1%83%D0%BB%D0%B8%20OS.docx"><span class="modal__num">23</span>Модули OS в Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=24%20%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%20%D1%81%20%D0%BF%D0%BE%D1%82%D0%BE%D0%BA%D0%B0%D0%BC%D0%B8%20.docx"><span class="modal__num">24</span>Работа с потоками (Streams) в Node.js</a></li>
+          <li class="modal__item"><a href="viewer.html?file=25%20Node.js_%D0%91%D0%B0%D0%B7%D1%8B_%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85.docx"><span class="modal__num">25</span>Node.js и базы данных</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script>
+    // Открытие/закрытие модалок
+    (function () {
+      var triggers = document.querySelectorAll('[data-modal]');
+      var overlays = document.querySelectorAll('.modal-overlay');
+
+      function openModal(id) {
+        var overlay = document.getElementById(id);
+        if (!overlay) return;
+        overlay.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+        // фокус на кнопку закрытия
+        var closeBtn = overlay.querySelector('.modal__close');
+        if (closeBtn) closeBtn.focus();
+      }
+
+      function closeAll() {
+        overlays.forEach(function (o) { o.classList.remove('is-open'); });
+        document.body.style.overflow = '';
+      }
+
+      triggers.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          openModal(btn.getAttribute('data-modal'));
+        });
+      });
+
+      overlays.forEach(function (overlay) {
+        // закрытие по клику на затемнение
+        overlay.addEventListener('click', function (e) {
+          if (e.target === overlay) closeAll();
+        });
+        // закрытие по кнопке ✕
+        var closeBtn = overlay.querySelector('.modal__close');
+        if (closeBtn) closeBtn.addEventListener('click', closeAll);
+      });
+
+      // закрытие по Esc
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeAll();
+      });
+    })();
+  </script>
+</body>
+</html>

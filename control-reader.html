@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Контроль — ЭУМК «Веб-программирование на стороне сервера»</title>
+  <link rel="icon" type="image/png" href="img/logo-pgktit.png">
+  <link rel="stylesheet" href="css/style.css?v=3">
+  <style>
+    /* =========================================================
+       THEORY READER — боковая панель + просмотр лекции
+       ========================================================= */
+
+    /* Страница прокручивается целиком; сайдбар — липкий */
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .site-main {
+      padding: 0;
+    }
+
+    /* Обёртка: боковая панель + область просмотра */
+    .reader-layout {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    /* ---- БОКОВАЯ ПАНЕЛЬ ---- */
+    .sidebar {
+      width: 300px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--card);
+      border-right: 2px solid var(--line);
+      overflow: hidden;
+      transition: width .3s ease, transform .3s ease;
+      position: sticky;
+      top: var(--header-h, 72px);
+      max-height: calc(100vh - var(--header-h, 72px));
+    }
+
+    .sidebar__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px 14px;
+      border-bottom: 2px solid var(--line);
+      flex-shrink: 0;
+    }
+
+    .sidebar__title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--ink);
+      margin: 0;
+      letter-spacing: .01em;
+    }
+
+    .sidebar__toggle {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1.5px solid var(--line);
+      background: transparent;
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: background .2s, color .2s;
+    }
+    .sidebar__toggle:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .sidebar__search {
+      padding: 12px 14px 10px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar__search input {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1.5px solid var(--line);
+      background: var(--bg);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      transition: border-color .2s;
+      box-sizing: border-box;
+    }
+    .sidebar__search input:focus {
+      border-color: var(--accent);
+    }
+
+    .sidebar__list {
+      overflow-y: auto;
+      flex: 1 1 auto;
+      padding: 10px 10px 20px;
+    }
+
+    /* Группа лекций */
+    .lec-group__label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 10px 8px 4px;
+      display: block;
+    }
+
+    .lec-group__list {
+      list-style: none;
+      margin: 0 0 8px;
+      padding: 0;
+    }
+
+    .lec-item a {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.35;
+      transition: background .18s, color .18s;
+      cursor: pointer;
+    }
+    .lec-item a:hover {
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+    }
+    .lec-item a.is-active {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--indigo) 100%);
+      color: #fff;
+      font-weight: 700;
+    }
+    .lec-item a.is-active .lec-item__num {
+      background: rgba(255,255,255,.25);
+      color: #fff;
+    }
+
+    .lec-item__num {
+      flex-shrink: 0;
+      min-width: 30px;
+      height: 22px;
+      border-radius: 6px;
+      background: var(--indigo-soft);
+      color: var(--indigo);
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    /* Схлопнутая боковая панель */
+    .sidebar.is-collapsed {
+      width: 0;
+      border-right-width: 0;
+    }
+
+    /* Кнопка открытия панели (когда она закрыта) */
+    .sidebar-open-btn {
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 50;
+      width: 34px;
+      height: 110px;
+      background: linear-gradient(135deg, var(--accent), var(--indigo));
+      border: none;
+      border-radius: 0 10px 10px 0;
+      color: #fff;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: inherit;
+      letter-spacing: .12em;
+      writing-mode: vertical-rl;
+      padding: 14px 0;
+      box-shadow: 2px 0 12px rgba(0,0,0,.18);
+      transition: width .2s;
+    }
+    .sidebar-open-btn:hover { width: 38px; }
+    .sidebar-open-btn.is-visible { display: flex; }
+
+    /* ---- ОБЛАСТЬ ПРОСМОТРА ---- */
+    .reader-main {
+      flex: 1 1 auto;
+      min-width: 0;
+      background: var(--page-bg);
+    }
+
+    .reader-welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 60vh;
+      padding: 60px 40px;
+      color: var(--muted);
+      gap: 20px;
+    }
+    .reader-welcome h2 {
+      font-size: 1.5rem;
+      color: var(--ink);
+      margin: 0;
+    }
+    .reader-welcome p {
+      font-size: 1rem;
+      max-width: 420px;
+      margin: 0;
+    }
+
+    /* ============================================
+       «БУМАГА» ЛЕКЦИИ — следует теме / режиму a11y
+       ============================================ */
+    :root {
+      --paper: #ffffff;
+      --paper-ink: #000000;
+      --paper-soft: #f0f0f0;
+      --paper-pre: #f5f5f5;
+      --paper-line: #cccccc;
+      --paper-border: #dddddd;
+      --paper-link: #0066cc;
+      --paper-quote-bg: #f0f4fa;
+      --paper-quote-border: #0e9f9a;
+      --paper-sub: #888888;
+    }
+    body.theme-dark {
+      --paper: #1b2342;
+      --paper-ink: #e9ecf8;
+      --paper-soft: #232c56;
+      --paper-pre: #131a35;
+      --paper-line: #2c3560;
+      --paper-border: #2c3560;
+      --paper-link: #8fd3ff;
+      --paper-quote-bg: #16224a;
+      --paper-quote-border: #2ec9c2;
+      --paper-sub: #a3aac8;
+    }
+    body.a11y {
+      --paper: #000000;
+      --paper-ink: #ffe600;
+      --paper-soft: #000000;
+      --paper-pre: #000000;
+      --paper-line: #ffe600;
+      --paper-border: #ffe600;
+      --paper-link: #ffe600;
+      --paper-quote-bg: #000000;
+      --paper-quote-border: #ffe600;
+      --paper-sub: #ffe600;
+    }
+
+    /* Блок с лекцией по теме */
+    .reader-doc {
+      max-width: 860px;
+      width: 100%;
+      margin: 28px auto 48px;
+      background: var(--paper);
+      color: var(--paper-ink);
+      border-radius: 8px;
+      box-shadow: 0 4px 32px rgba(0,0,0,.13);
+      overflow: hidden;
+      display: none;
+      flex-shrink: 0;
+    }
+    body.theme-dark .reader-doc { box-shadow: 0 4px 40px rgba(0,0,0,.55); }
+    body.a11y .reader-doc { border: 3px solid #ffe600; }
+    .reader-doc.is-visible { display: block; }
+
+    .reader-doc__head {
+      padding: 20px 56px 16px;
+      border-bottom: 2px solid var(--paper-border);
+      background: var(--paper);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .reader-download {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .02em;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+    }
+    .reader-download:hover { background: var(--accent-dark); transform: translateY(-1px); }
+    .reader-download:active { transform: translateY(0); }
+    body.a11y .reader-download { background: #ffe600; color: #000; }
+    body.a11y .reader-download:hover { background: #fff200; }
+    .reader-doc__title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--paper-ink);
+      margin: 0 0 4px;
+      font-family: Calibri, Arial, sans-serif;
+    }
+    .reader-doc__meta { font-size: 12px; color: var(--paper-sub); }
+
+    .reader-doc__content {
+      padding: 48px 56px 72px;
+      font-family: "Times New Roman", Georgia, serif;
+      font-size: 12pt;
+      line-height: 1.5;
+      color: var(--paper-ink);
+      background: var(--paper);
+    }
+
+    /* Типографика */
+    .reader-doc__content p       { margin: 0 0 10pt; color: var(--paper-ink); }
+    .reader-doc__content h1,
+    .reader-doc__content h2,
+    .reader-doc__content h3,
+    .reader-doc__content h4,
+    .reader-doc__content h5,
+    .reader-doc__content h6      { color: var(--paper-ink); font-weight: 700; }
+    .reader-doc__content h1      { font-size: 24pt; margin: 20pt 0 10pt; }
+    .reader-doc__content h2      { font-size: 20pt; margin: 20pt 0 10pt; }
+    .reader-doc__content h3      { font-size: 16pt; margin: 16pt 0 8pt;  }
+    .reader-doc__content h4      { font-size: 13pt; margin: 14pt 0 7pt;  }
+    .reader-doc__content h5      { font-size: 12pt; margin: 12pt 0 6pt;  }
+    .reader-doc__content h6      { font-size: 11pt; margin: 10pt 0 5pt;  }
+    .reader-doc__content ul,
+    .reader-doc__content ol      { margin: 6pt 0 6pt 1.25cm; padding: 0; }
+    .reader-doc__content li      { margin: 3pt 0; color: var(--paper-ink); }
+    .reader-doc__content table   { border-collapse: collapse; width: 100%; margin: 12pt 0; font-size: 10pt; }
+    .reader-doc__content th,
+    .reader-doc__content td      { border: 1px solid var(--paper-line); padding: 4pt 6pt; vertical-align: top; color: var(--paper-ink); }
+    .reader-doc__content th      { background: var(--paper-soft); font-weight: 700; }
+    .reader-doc__content pre     {
+      background: var(--paper-pre); color: var(--paper-ink); border: 1px solid var(--paper-border);
+      padding: 12pt; border-radius: 4px; overflow-x: auto;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 9.5pt; line-height: 1.4;
+      white-space: pre-wrap; word-wrap: break-word;
+    }
+    .reader-doc__content code    { font-family: Consolas, "Courier New", monospace; font-size: 10pt; background: var(--paper-soft); padding: 1px 4px; border-radius: 3px; color: var(--paper-ink); }
+    .reader-doc__content pre code { background: transparent; padding: 0; color: inherit; }
+    .reader-doc__content blockquote {
+      margin: 12pt 1.25cm; padding: 6pt 12pt 6pt 18pt;
+      border-left: 4px solid var(--paper-quote-border); background: var(--paper-quote-bg);
+      font-style: italic; line-height: 1.5; color: var(--paper-ink);
+    }
+    .reader-doc__content blockquote p { margin: 0; }
+    .reader-doc__content img     { max-width: 100%; height: auto; display: block; margin: 12pt auto; border: 1px solid var(--paper-border); }
+    .reader-doc__content a       { color: var(--paper-link); text-decoration: underline; }
+    .reader-doc__content hr      { border: none; border-top: 1px solid var(--paper-line); margin: 18pt 0; }
+
+        /* Блок лабораторной №1: установщик и презентация Denwer */
+    .lab1-extra {
+      display: none;
+      padding: 16px 56px;
+      border-bottom: 2px solid var(--paper-border);
+      background: var(--paper-pre);
+    }
+    .lab1-extra.is-visible { display: block; }
+    .lab1-extra__title {
+      font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em;
+      color: var(--paper-sub); margin: 0 0 10px;
+    }
+    .lab1-extra__row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .lab1-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 16px; border-radius: 9px; border: 1.5px solid var(--paper-line);
+      background: var(--paper-soft); color: var(--paper-ink);
+      font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none;
+      transition: background .2s, border-color .2s;
+    }
+    .lab1-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+    .lab1-btn--accent { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .lab1-btn--accent:hover { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
+    body.a11y .lab1-btn { background: #000; color: #ffe600; border-color: #ffe600; }
+    body.a11y .lab1-btn--accent { background: #ffe600; color: #000; }
+
+    /* Текст презентации */
+    .ppt-text { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .ppt-text[hidden] { display: none; }
+    .ppt-slide {
+      border: 1.5px solid var(--paper-line); border-radius: 10px; background: var(--paper);
+      padding: 12px 16px;
+    }
+    .ppt-slide__num { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+    .ppt-slide h4 { margin: 4px 0 6px; font-size: 15px; color: var(--paper-ink); font-weight: 800; }
+    .ppt-slide p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--paper-ink); white-space: pre-line; }
+    body.a11y .ppt-slide { border-color: #ffe600; }
+    body.a11y .ppt-slide__num { color: #ffe600; }
+
+    /* Загрузка / ошибка */
+    .reader-loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      gap: 16px;
+      color: var(--muted);
+      padding: 48px;
+    }
+    .reader-loading.is-visible { display: flex; }
+    .reader-spinner {
+      width: 44px; height: 44px;
+      border: 4px solid var(--line);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .reader-error {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      gap: 12px;
+      color: #c00;
+      text-align: center;
+      padding: 48px;
+    }
+    .reader-error.is-visible { display: flex; }
+
+    /* Навигация между лекциями */
+    .reader-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 56px 20px;
+      gap: 12px;
+      background: var(--paper);
+      border-top: 1px solid var(--paper-border);
+    }
+    .reader-nav__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1.5px solid var(--paper-line);
+      background: var(--paper-soft);
+      color: var(--paper-ink);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s, border-color .2s, color .2s;
+      text-decoration: none;
+    }
+    .reader-nav__btn:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent-dark);
+    }
+    body.a11y .reader-nav__btn { background: #000; color: #ffe600; border-color: #ffe600; }
+    body.a11y .reader-nav__btn:hover { background: #ffe600; color: #000; }
+    .reader-nav__btn:disabled,
+    .reader-nav__btn[data-disabled] {
+      opacity: .35;
+      pointer-events: none;
+    }
+    .reader-nav__info {
+      font-size: 12px;
+      color: var(--paper-sub);
+      text-align: center;
+    }
+
+    /* Мобильный оверлей боковой панели */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      background: rgba(0,0,0,.45);
+    }
+    .sidebar-overlay.is-visible { display: block; }
+
+    /* ---- АДАПТИВ ---- */
+    @media (max-width: 860px) {
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 45;
+        width: 280px;
+        transform: translateX(-100%);
+        transition: transform .3s ease;
+        box-shadow: 4px 0 24px rgba(0,0,0,.2);
+      }
+      .sidebar.is-open {
+        transform: translateX(0);
+      }
+      .sidebar.is-collapsed {
+        width: 280px;
+        border-right-width: 2px;
+        transform: translateX(-100%);
+      }
+      .sidebar-open-btn {
+        display: flex !important;
+        top: auto;
+        bottom: 18px;
+        left: auto;
+        right: 14px;
+        transform: none;
+        writing-mode: horizontal-tb;
+        width: auto;
+        height: auto;
+        padding: 12px 20px;
+        border-radius: 26px;
+        letter-spacing: .02em;
+      }
+      .reader-layout { display: block; }
+      .reader-main { height: auto; overflow: visible; }
+      .sidebar { max-height: none; height: 100vh; }
+      .reader-doc__content { padding: 28px 24px 48px; }
+      .reader-doc__head { padding: 14px 24px; }
+      .reader-nav { padding: 12px 24px 16px; }
+    }
+
+    @media (max-width: 540px) {
+      .lab1-extra { padding: 12px 14px; }
+      .reader-doc__content { padding: 20px 14px 40px; font-size: 11pt; }
+      .reader-doc__head { padding: 12px 14px; }
+      .reader-nav { padding: 10px 14px 14px; flex-wrap: wrap; }
+      .reader-nav__btn { font-size: 12px; padding: 8px 14px; }
+    }
+
+    /* a11y */
+    body.a11y .reader-error { color: #ffe600 !important; }
+    body.a11y .reader-error button { background: #ffe600 !important; color: #000 !important; }
+    body.theme-dark .reader-error { color: #ff8a8a; }
+    body.a11y .sidebar { background: #000 !important; border-color: #ffe600 !important; }
+    body.a11y .sidebar__title { color: #ffe600 !important; }
+    body.a11y .sidebar__search input { background: #000 !important; color: #ffe600 !important; border-color: #ffe600 !important; }
+    body.a11y .lec-group__label { color: #ffe600 !important; }
+    body.a11y .lec-item a { color: #ffe600 !important; }
+    body.a11y .lec-item a:hover { background: #ffe600 !important; color: #000 !important; }
+    body.a11y .lec-item a.is-active { background: #ffe600 !important; color: #000 !important; }
+    body.a11y .lec-item__num { background: #000 !important; color: #ffe600 !important; border: 1px solid #ffe600; }
+    body.a11y .lec-item a.is-active .lec-item__num { background: #000 !important; color: #ffe600 !important; }
+    body.a11y .sidebar__toggle { background: #000 !important; border-color: #ffe600 !important; color: #ffe600 !important; }
+    body.a11y .reader-welcome h2 { color: #ffe600 !important; }
+    body.a11y .reader-welcome p { color: #ffe600 !important; }
+
+    /* ============================================
+       ТЕСТ — стили поверх «бумаги»
+       ============================================ */
+    .test-counter {
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--paper-ink);
+      background: var(--paper-soft);
+      border: 1.5px solid var(--paper-line);
+      padding: 8px 14px;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+    .test-progress { height: 6px; background: var(--paper-soft); }
+    .test-progress__bar { height: 100%; width: 0%; background: linear-gradient(135deg, var(--accent) 0%, var(--indigo) 100%); transition: width .3s ease; }
+
+    .test-body { display: flex; flex-direction: column; gap: 0; }
+
+    .test-question {
+      margin: 18px 26px;
+      padding: 18px 22px 20px;
+      border: 1.5px solid var(--paper-line);
+      border-radius: 14px;
+      background: var(--paper);
+      min-width: 0;
+    }
+    .test-question__text {
+      display: flex; gap: 12px; align-items: baseline;
+      font-size: 15px; font-weight: 700; color: var(--paper-ink); margin-bottom: 12px;
+    }
+    .test-question__num {
+      flex-shrink: 0; min-width: 30px; height: 24px; padding: 0 6px;
+      border-radius: 6px; background: var(--paper-soft); color: var(--paper-sub);
+      display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800;
+    }
+    .test-question__hint { font-size: 12px; color: var(--paper-sub); font-weight: 400; margin: -6px 0 10px 42px; }
+
+    .test-opts { display: flex; flex-direction: column; gap: 8px; margin-left: 42px; }
+
+    .opt {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 12px; border: 1.5px solid var(--paper-line); border-radius: 10px;
+      background: var(--paper-soft); cursor: pointer;
+      font-size: 14px; line-height: 1.45; color: var(--paper-ink);
+      transition: border-color .15s, background .15s;
+    }
+    .opt:hover { border-color: var(--accent); }
+    .opt input { margin-top: 2px; accent-color: var(--accent); }
+    .opt.is-checked { border-color: var(--accent); background: var(--accent-soft); }
+
+    body.a11y .opt { border-color: #ffe600; background: #000; color: #ffe600; }
+    body.a11y .opt:hover { border-color: #fff200; }
+    body.a11y .opt.is-checked { background: #ffe600; color: #000; }
+
+    .test-footer {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+      padding: 18px 56px 26px; border-top: 2px solid var(--paper-border); background: var(--paper);
+    }
+    .test-hint { font-size: 12px; color: var(--paper-sub); }
+    .test-finish-btn { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .test-finish-btn:hover { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
+    body.a11y .test-finish-btn { background: #ffe600; color: #000; border-color: #ffe600; }
+
+    /* РЕЗУЛЬТАТ */
+    .result-body { padding: 28px 56px 48px; background: var(--paper); }
+    .result-score {
+      display: flex; align-items: baseline; gap: 14px;
+      font-size: 64px; font-weight: 800; color: var(--paper-ink); line-height: 1;
+    }
+    .result-score__of { font-size: 16px; font-weight: 600; color: var(--paper-sub); }
+    .result-verdict { display: flex; align-items: center; gap: 22px; margin: 10px 0 22px; flex-wrap: wrap; }
+    .result-percent { font-size: 22px; font-weight: 800; color: var(--accent-dark); }
+    .result-mark { font-size: 16px; color: var(--paper-ink); }
+    .result-mark strong { font-size: 26px; color: var(--accent-dark); }
+    body.a11y .result-percent, body.a11y .result-mark strong { color: #ffe600; }
+
+    .result-review { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+    .review-item {
+      border: 1.5px solid var(--paper-line); border-left-width: 6px; border-radius: 10px;
+      padding: 10px 14px; background: var(--paper-soft);
+    }
+    .review-item--ok { border-left-color: #0e9f9a; }
+    .review-item--bad { border-left-color: #c0392b; }
+    .review-item__q { font-weight: 700; color: var(--paper-ink); margin-bottom: 6px; }
+    .review-item__a, .review-item__c { font-size: 13px; color: var(--paper-ink); }
+    .review-item__a b, .review-item__c b { color: var(--paper-sub); }
+    body.a11y .review-item--ok { border-left-color: #ffe600; }
+    body.a11y .review-item--bad { border-left-color: #ff6b6b; }
+
+    .result-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    @media (max-width: 600px) {
+      .test-question { padding: 16px 14px; }
+      .test-opts { margin-left: 0; }
+      .test-question__hint { margin-left: 0; }
+      .test-footer { padding: 14px; }
+      .result-body { padding: 18px 14px 32px; }
+      .result-score { font-size: 46px; }
+    }
+
+    /* Управление видимостью режимов просмотра */
+    .reader-doc.test-view, .reader-doc.result-view, .reader-doc.exam-view { display: block; }
+    .reader-doc.test-view[hidden], .reader-doc.result-view[hidden], .reader-doc.exam-view[hidden] { display: none; }
+    .reader-welcome[hidden] { display: none; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header__inner">
+      <a class="brand" href="index.html" aria-label="На главную страницу">
+        <img class="brand__logo brand__logo--img" src="img/logo-pgktit.png" alt="" aria-hidden="true">
+        <h1 class="brand__text">
+          <span class="brand__badge">ЭУМК</span>
+          <span class="brand__title">«Веб-программирование на&nbsp;стороне&nbsp;сервера»</span>
+          <span class="brand__subtitle">Электронный учебно-методический комплекс</span>
+        </h1>
+      </a>
+      <div class="toolbar">
+        <button class="tool-btn tool-btn--a11y" type="button" id="a11y-toggle" aria-pressed="false" title="Версия для слабовидящих">
+          <span class="tool-btn__ico tool-btn__ico--eye" aria-hidden="true"></span>
+          <span class="tool-btn__txt">Для слабовидящих</span>
+        </button>
+        <button class="tool-btn tool-btn--theme" type="button" id="theme-toggle" aria-pressed="false" title="Переключить тему" aria-label="Переключить тему">
+          <span class="tool-btn__ico tool-btn__ico--moon" aria-hidden="true"></span>
+        </button>
+      </div>
+      <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav">
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+      </button>
+    </div>
+    <div class="container header__nav">
+      <nav class="nav" id="main-nav" aria-label="Основное меню">
+        <ul class="nav__list">
+          <li><a class="nav__link" href="index.html">Главная</a></li>
+          <li><a class="nav__link" href="theory-reader.html">Теория</a></li>
+          <li><a class="nav__link" href="practice-reader.html">Практика</a></li>
+          <li><a class="nav__link nav__link--active" href="control-reader.html">Контроль</a></li>
+          <li><a class="nav__link" href="extra.html">Материалы</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="reader-layout">
+
+      <!-- Боковая панель -->
+      <aside class="sidebar" id="sidebar" aria-label="Список лекций">
+        <div class="sidebar__head">
+          <span class="sidebar__title">Контроль</span>
+          <button class="sidebar__toggle" id="sidebar-close" title="Скрыть панель" aria-label="Скрыть панель">←</button>
+        </div>
+        <div class="sidebar__search">
+          <input type="search" id="lec-search" placeholder="Поиск теста…" aria-label="Поиск теста">
+        </div>
+        <div class="sidebar__list" id="sidebar-list">
+
+          <span class="lec-group__label">Обязательное</span>
+          <ul class="lec-group__list">
+            <li class="lec-item"><a href="#" id="exam-item"><span class="lec-item__num">К</span>Контрольная работа</a></li>
+          </ul>
+
+          <span class="lec-group__label">PHP (Лекции 1–14)</span>
+          <ul class="lec-group__list">
+            <li class="lec-item"><a href="#" data-test="0"><span class="lec-item__num">1</span>Обзор технологий создания веб</a></li>
+            <li class="lec-item"><a href="#" data-test="1"><span class="lec-item__num">2</span>Веб-сервер и HTTP</a></li>
+            <li class="lec-item"><a href="#" data-test="2"><span class="lec-item__num">3</span>Установка и настройка веб-сервера</a></li>
+            <li class="lec-item"><a href="#" data-test="3"><span class="lec-item__num">4</span>Основы синтаксиса PHP</a></li>
+            <li class="lec-item"><a href="#" data-test="4"><span class="lec-item__num">5</span>Массивы и строки (основы)</a></li>
+            <li class="lec-item"><a href="#" data-test="5"><span class="lec-item__num">5.1</span>Массивы и строки (функции)</a></li>
+            <li class="lec-item"><a href="#" data-test="6"><span class="lec-item__num">6</span>Условия и ветвление</a></li>
+            <li class="lec-item"><a href="#" data-test="7"><span class="lec-item__num">6.1</span>Стандартные функции PHP</a></li>
+            <li class="lec-item"><a href="#" data-test="8"><span class="lec-item__num">7</span>Запросы GET и POST</a></li>
+            <li class="lec-item"><a href="#" data-test="9"><span class="lec-item__num">8</span>Файловая система в PHP</a></li>
+            <li class="lec-item"><a href="#" data-test="10"><span class="lec-item__num">9</span>Сессии и cookie</a></li>
+            <li class="lec-item"><a href="#" data-test="11"><span class="lec-item__num">10</span>Функции в PHP</a></li>
+            <li class="lec-item"><a href="#" data-test="12"><span class="lec-item__num">11</span>Основы ООП в PHP</a></li>
+            <li class="lec-item"><a href="#" data-test="13"><span class="lec-item__num">12</span>Классы и объекты</a></li>
+            <li class="lec-item"><a href="#" data-test="14"><span class="lec-item__num">13</span>Трейты</a></li>
+            <li class="lec-item"><a href="#" data-test="15"><span class="lec-item__num">14</span>Клиентская часть</a></li>
+          </ul>
+
+          <span class="lec-group__label">Node.js (Лекции 15–25)</span>
+          <ul class="lec-group__list">
+            <li class="lec-item"><a href="#" data-test="16"><span class="lec-item__num">15</span>Введение в Node.js</a></li>
+            <li class="lec-item"><a href="#" data-test="17"><span class="lec-item__num">16.1</span>npm и управление пакетами</a></li>
+            <li class="lec-item"><a href="#" data-test="18"><span class="lec-item__num">16.2</span>Общие сведения о NPM</a></li>
+            <li class="lec-item"><a href="#" data-test="19"><span class="lec-item__num">17</span>Цикл событий</a></li>
+            <li class="lec-item"><a href="#" data-test="20"><span class="lec-item__num">18</span>Асинхронное программирование</a></li>
+            <li class="lec-item"><a href="#" data-test="21"><span class="lec-item__num">19</span>Работа с файлами</a></li>
+            <li class="lec-item"><a href="#" data-test="22"><span class="lec-item__num">19.1</span>Файловая система в Node.js</a></li>
+            <li class="lec-item"><a href="#" data-test="23"><span class="lec-item__num">20</span>Протокол HTTP</a></li>
+            <li class="lec-item"><a href="#" data-test="24"><span class="lec-item__num">20.1</span>HTTP-сервер</a></li>
+            <li class="lec-item"><a href="#" data-test="25"><span class="lec-item__num">21</span>Фреймворки Koa и Express</a></li>
+            <li class="lec-item"><a href="#" data-test="26"><span class="lec-item__num">22</span>Понятие о CLI</a></li>
+            <li class="lec-item"><a href="#" data-test="27"><span class="lec-item__num">23</span>Модули OS и HTTP</a></li>
+            <li class="lec-item"><a href="#" data-test="28"><span class="lec-item__num">24</span>Потоки</a></li>
+            <li class="lec-item"><a href="#" data-test="29"><span class="lec-item__num">25</span>Node.js и базы данных</a></li>
+          </ul>
+
+      </aside>
+
+      <!-- Оверлей для мобильных -->
+      <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+      <!-- Кнопка открытия панели -->
+      <button class="sidebar-open-btn" id="sidebar-open-btn" title="Открыть список лекций" aria-label="Открыть список лекций">Список</button>
+
+      <!-- Основная область -->
+      <div class="reader-main" id="reader-main">
+
+        <div class="reader-welcome" id="reader-welcome">
+          <h2>Контроль знаний</h2>
+          <p>Выберите тест по нужной лекции в списке слева. По завершении теста вы увидите баллы и отметку по&nbsp;десятибалльной шкале.</p>
+          <p><a class="link-back" href="файлы%20контроля/Обязательная%20контрольная%20работа%20Веб-программирование.docx" download>Скачать обязательную контрольную работу (.docx)</a></p>
+        </div>
+
+        <div class="reader-error" id="reader-error">
+          <p id="reader-error-msg">Не удалось загрузить материал.</p>
+        </div>
+
+        <!-- ТЕСТ -->
+        <div class="reader-doc test-view" id="test-view" hidden>
+          <div class="reader-doc__head">
+            <div>
+              <div class="reader-doc__title" id="test-title">—</div>
+              <div class="reader-doc__meta" id="test-meta">Тест</div>
+            </div>
+            <span class="test-counter" id="test-counter">Отвечено: 0 / 10</span>
+          </div>
+          <div class="test-progress" aria-hidden="true"><div class="test-progress__bar" id="test-progress"></div></div>
+          <form class="test-body" id="test-body"></form>
+          <div class="test-footer">
+            <span class="test-hint">Неотвеченные вопросы засчитываются как неверные.</span>
+            <button class="reader-nav__btn test-finish-btn" id="btn-finish" type="button">Завершить тест</button>
+          </div>
+        </div>
+
+        <!-- РЕЗУЛЬТАТ -->
+        <div class="reader-doc result-view" id="result-view" hidden>
+          <div class="reader-doc__head">
+            <div>
+              <div class="reader-doc__title" id="result-title">—</div>
+              <div class="reader-doc__meta" id="result-meta">Результат</div>
+            </div>
+          </div>
+          <div class="result-body">
+            <div class="result-score"><span id="result-score">0</span><span class="result-score__of">верных ответов из 10</span></div>
+            <div class="result-verdict"><span class="result-percent" id="result-percent">0%</span><span class="result-mark">Отметка: <strong id="result-mark">1</strong> из 10</span></div>
+            <div class="result-review" id="result-review"></div>
+            <div class="result-actions">
+              <button class="reader-nav__btn" id="btn-retry" type="button">Пройти ещё раз</button>
+              <button class="reader-nav__btn" id="btn-to-list" type="button">К списку тестов</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- КОНТРОЛЬНАЯ РАБОТА -->
+        <div class="reader-doc exam-view" id="exam-view" hidden>
+          <div class="reader-doc__head">
+            <div>
+              <div class="reader-doc__title">Обязательная контрольная работа</div>
+              <div class="reader-doc__meta">Веб-программирование на стороне сервера · 5 вариантов · максимум 30 баллов</div>
+            </div>
+            <button class="reader-download" id="btn-exam-download" type="button">Скачать контрольную работу</button>
+          </div>
+          <div class="reader-doc__content" id="exam-content"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__inner">
+      <span class="footer__badge">ЭУМК</span>
+      <p class="footer__text">Электронный учебно-методический комплекс «Веб-программирование на стороне сервера»</p>
+    </div>
+  </footer>
+
+  <script src="js/vendor/mammoth.browser.min.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    /* ===== Тесты, составленные по каждой лекции курса ===== */
+// Тесты по лекциям 1–7 (ЭУМК «Веб-программирование на стороне сервера»)
+// type: 'single' — один верный ответ (correct: индекс), 'multi' — несколько (correct: массив индексов)
+var TESTS = [
+{
+  num: '1', group: 'PHP', title: 'Лекция 1. Обзор технологий создания веб-приложений',
+  questions: [
+    { q: 'Что задаёт структуру веб-страницы (заголовки, абзацы, списки, таблицы)?', type: 'single', options: ['CSS', 'HTML', 'JavaScript', 'PHP'], correct: 1 },
+    { q: 'За что отвечает CSS?', type: 'single', options: ['За структуру страницы', 'За внешний вид и оформление', 'За интерактивность на клиенте', 'За обработку запросов на сервере'], correct: 1 },
+    { q: 'Что добавляет на веб-страницу JavaScript?', type: 'single', options: ['Структуру документа', 'Хранение данных', 'Интерактивность и динамику', 'Стили и анимации'], correct: 2 },
+    { q: 'Какие технологии серверной части перечислены в лекции?', type: 'multi', options: ['PHP', 'Python (Django, Flask)', 'Node.js', 'HTML', 'CSS', 'JavaScript без среды выполнения'], correct: [0, 1, 2] },
+    { q: 'Что является результатом этапа «Анализ и постановка целей»?', type: 'single', options: ['Готовый дизайн-макет', 'Техническое задание и концепция проекта', 'Рабочая фронтенд-часть', 'Опубликованный сайт'], correct: 1 },
+    { q: 'Какие CMS были перечислены в лекции?', type: 'multi', options: ['WordPress', 'Joomla', 'Drupal', 'Tilda', 'Webpack'], correct: [0, 1, 2] },
+    { q: 'Для чего предназначены системы контроля версий (Git, GitHub)?', type: 'single', options: ['Для сборки и оптимизации проекта', 'Для тестирования интерфейсов', 'Для отслеживания изменений в коде и командной работы', 'Для размещения сайта в сети'], correct: 2 },
+    { q: 'Какие инструменты автоматизации были названы в лекции?', type: 'multi', options: ['Webpack', 'Gulp', 'Jest', 'Selenium'], correct: [0, 1] },
+    { q: 'Что означает подход Mobile First?', type: 'single', options: ['Сначала разрабатывается версия для ПК, потом мобильная', 'Сайты должны корректно работать прежде всего на смартфонах и планшетах', 'Мобильное приложение создаётся раньше сайта', 'Десктопная версия является основной'], correct: 1 },
+    { q: 'Что такое SPA?', type: 'single', options: ['Smart Phone Application', 'Server Page Application', 'Single Page Application', 'Static Page Architecture'], correct: 2 }
+  ]
+},
+{
+  num: '2', group: 'PHP', title: 'Лекция 2. Механизм работы веб-сервера. Назначение протокола HTTP',
+  questions: [
+    { q: 'Что такое HTTP?', type: 'single', options: ['Язык программирования', 'Протокол прикладного уровня для обмена данными', 'Веб-сервер от Apache', 'Формат хранения данных'], correct: 1 },
+    { q: 'Какие порты обычно слушает веб-сервер?', type: 'single', options: ['21 и 22', '3306 и 5432', '80 для HTTP и 443 для HTTPS', '8080 и 8443'], correct: 2 },
+    { q: 'Какие задачи выполняет веб-сервер?', type: 'multi', options: ['Приём HTTP-запросов', 'Поиск и обработка запрашиваемых ресурсов', 'Передача ресурсов в виде HTTP-ответов', 'Компиляция PHP-файлов в exe'], correct: [0, 1, 2] },
+    { q: 'Какое верное утверждение о методе GET?', type: 'single', options: ['Он создаёт ресурс на сервере', 'Он безопасен (не изменяет состояние сервера) и идемпотентен', 'Он не идемпотентен', 'Он используется для удаления ресурса'], correct: 1 },
+    { q: 'Какое верное утверждение о методе POST?', type: 'single', options: ['Он идемпотентен, как и PUT', 'Он безопасен, как GET', 'Он не идемпотентен: повторный запрос может создать дубликаты', 'Он предназначен только для чтения данных'], correct: 2 },
+    { q: 'Какие методы HTTP описаны в лекции?', type: 'multi', options: ['GET', 'POST', 'PUT', 'DELETE', 'FTP', 'SMTP'], correct: [0, 1, 2, 3] },
+    { q: 'Какая модель взаимодействия лежит в основе HTTP?', type: 'single', options: ['Опубликовать-подписаться', 'Peer-to-peer', 'Модель «клиент — сервер», цикл запрос-ответ', 'Многоадресная рассылка'], correct: 2 },
+    { q: 'Что означает идемпотентность метода PUT?', type: 'single', options: ['Метод нельзя использовать повторно', 'Повторные одинаковые запросы приводят к одному и тому же состоянию ресурса', 'Метод не требует заголовков', 'Метод работает только с JSON'], correct: 1 },
+    { q: 'Что вернёт сервер, если запрашиваемый ресурс не найден?', type: 'single', options: ['200 OK', '500 Internal Server Error', '404 Not Found', '301 Moved Permanently'], correct: 2 },
+    { q: 'Какие особенности HTTP описаны в лекции?', type: 'multi', options: ['Клиент отправляет запрос, сервер — отвечает', 'Данные передаются в виде текстовых сообщений', 'Вся коммуникация строится на модели «запрос-ответ»', 'Сервер всегда хранит состояние между запросами'], correct: [0, 1, 2] }
+  ]
+},
+{
+  num: '3', group: 'PHP', title: 'Лекция 3. Установка и настройка веб-сервера',
+  questions: [
+    { q: 'Чем характеризуется Apache HTTP Server?', type: 'single', options: ['Асинхронной событийной моделью', 'Многопроцессной/многопоточной моделью обработки запросов', 'Отсутствием модулей', 'Работой только на Linux'], correct: 1 },
+    { q: 'Какая архитектура у Nginx?', type: 'single', options: ['Многопоточная (worker)', 'Многопроцессная (prefork)', 'Асинхронная событийная (event loop)', 'Однопоточная блокирующая'], correct: 2 },
+    { q: 'Какие достоинства Nginx перечислены в лекции?', type: 'multi', options: ['Высокая производительность и низкое потребление ресурсов', 'Эффективное обслуживание статического контента', 'Удобная балансировка нагрузки и обратный прокси', 'Поддержка .htaccess на уровне каталогов'], correct: [0, 1, 2] },
+    { q: 'Что верно относительно файлов .htaccess?', type: 'single', options: ['Они поддерживаются и Apache, и Nginx', 'Они есть только у Nginx', 'Они есть у Apache; Nginx их не поддерживает', 'Они используются для передачи PHP-файлов'], correct: 2 },
+    { q: 'Как называются основные конфигурационные файлы Apache и Nginx?', type: 'single', options: ['nginx.conf и httpd.conf', 'httpd.conf и nginx.conf', 'apache.ini и nginx.ini', 'server.conf и web.conf'], correct: 1 },
+    { q: 'Что задаёт директива memory_limit в php.ini?', type: 'single', options: ['Максимальное время выполнения скрипта', 'Максимальный объём памяти для одного скрипта', 'Максимальный размер загружаемого файла', 'Максимальный размер POST-запроса'], correct: 1 },
+    { q: 'Что должен включать display_errors на «боевом» сервере?', type: 'single', options: ['On — чтобы видеть ошибки', 'Off — чтобы скрыть ошибки от посторонних', 'По желанию пользователя', 'Задано флагом E_ALL'], correct: 1 },
+    { q: 'Какие модули Apache перечислены в лекции?', type: 'multi', options: ['mod_ssl', 'mod_rewrite', 'mod_proxy', 'mod_wsgi_perl'], correct: [0, 1, 2] },
+    { q: 'Какое значение должен иметь post_max_size относительно upload_max_filesize?', type: 'single', options: ['Меньше upload_max_filesize', 'Не меньше upload_max_filesize', 'Равен memory_limit', 'Не имеет значения'], correct: 1 },
+    { q: 'Для чего предназначен модуль mod_rewrite?', type: 'single', options: ['Для кэширования страниц', 'Для правил перенаправления URL', 'Для защиты от атак', 'Для работы с SSL/TLS'], correct: 1 }
+  ]
+},
+{
+  num: '4', group: 'PHP', title: 'Лекция 4. Основы синтаксиса PHP',
+  questions: [
+    { q: 'Как в HTML-документе начинается и заканчивается PHP-код?', type: 'single', options: ['<script> … <\/script>', '<?php … ?>', '<% … %>', '{{ … }}'], correct: 1 },
+    { q: 'С чего объявляется переменная в PHP и что регистровая она?', type: 'single', options: ['С var; регистронезависима', 'С $; чувствительна к регистру', 'С let; чувствительна к регистру', 'С @; регистронезависима'], correct: 1 },
+    { q: 'Какие типы данных в PHP относятся к скалярным?', type: 'multi', options: ['boolean', 'integer', 'float', 'array', 'object'], correct: [0, 1, 2] },
+    { q: 'Какой оператор используется для конкатенации строк в PHP?', type: 'single', options: ['+', '&', '.', ','], correct: 2 },
+    { q: 'Чем отличается оператор === от ==?', type: 'single', options: ['Ничем, они взаимозаменяемы', '=== проверяет и значения, и типы', '== проверяет и значения, и типы', '=== работает только с числами'], correct: 1 },
+    { q: 'Как обрабатываются переменные внутри строки в одинарных кавычках?', type: 'single', options: ['Подставляются их значения', 'Не обрабатываются вообще', 'Обрабатываются как управляющие последовательности', 'Вызывают ошибку'], correct: 1 },
+    { q: 'Какие типы данных PHP являются специальными?', type: 'multi', options: ['resource', 'array', 'NULL', 'string'], correct: [0, 2] },
+    { q: 'Какая функция защищает вывод данных от XSS (htmlspecialchars)?', type: 'single', options: ['sanitize()', 'htmlspecialchars()', 'strip_tags_all()', 'escape_xss()'], correct: 1 },
+    { q: 'Каким оператором соединяются строки при выводе через echo?', type: 'single', options: ['+', '&', ';', '.'], correct: 3 },
+    { q: 'Как подключить внешний PHP-файл внутри скрипта?', type: 'single', options: ['Через <link>', 'Через include или require', 'Через import', 'Через @require_once_only'], correct: 1 }
+  ]
+},
+{
+  num: '5', group: 'PHP', title: 'Лекция 5. Работа с массивами и строками',
+  questions: [
+    { q: 'С какого числа начинается индексация массива в PHP?', type: 'single', options: ['С 1', 'С 0', 'С любого числа', 'С -1'], correct: 1 },
+    { q: 'Чем ассоциативный массив отличается от индексированного?', type: 'single', options: ['Он хранит только числа', 'Ключи задаются строками (или произвольными значениями)', 'Он всегда многомерный', 'Он не может содержать строки'], correct: 1 },
+    { q: 'Что выведет $matrix[1][2] для массива [[1,2,3],[4,5,6],[7,8,9]]?', type: 'single', options: ['5', '3', '6', '8'], correct: 2 },
+    { q: 'Какие функции сортировки перечислены в лекции?', type: 'multi', options: ['sort', 'rsort', 'asort / arsort', 'ksort / krsort'], correct: [0, 1, 2, 3] },
+    { q: 'Что делает функция in_array()?', type: 'single', options: ['Возвращает ключ найденного элемента', 'Проверяет наличие значения в массиве', 'Удаляет элемент из массива', 'Сливает два массива'], correct: 1 },
+    { q: 'Что возвращает функция array_search()?', type: 'single', options: ['true или false', 'Ключ первого найденного элемента', 'Все ключи массива', 'Число найденных элементов'], correct: 1 },
+    { q: 'Что делает array_merge()?', type: 'single', options: ['Сортирует массив', 'Сливает два и более массива', 'Удаляет дубликаты', 'Разбивает массив на части'], correct: 1 },
+    { q: 'Что верно о строках в PHP?', type: 'single', options: ['Они изменяемы, как массивы', 'Строки неизменяемы — для изменения создаётся новая строка', 'Строки всегда в UTF-8', 'Строки занимают до 255 символов'], correct: 1 },
+    { q: 'Что делает strlen($text)?', type: 'single', options: ['Меняет регистр строки', 'Возвращает длину строки', 'Находит позицию подстроки', 'Разбивает строку по разделителю'], correct: 1 },
+    { q: 'Что вернёт substr($text, 0, 7)?', type: 'single', options: ['7-й символ строки', 'Подстроку из 7 символов, начиная с позиции 0', 'Строку до 7-й позиции', 'Все символы кроме первых семи'], correct: 1 }
+  ]
+},
+{
+  num: '5.1', group: 'PHP', title: 'Лекция 5.1. Работа с массивами и строками в PHP',
+  questions: [
+    { q: 'Что вернёт count(NULL)?', type: 'single', options: ['1', '0', 'NULL', 'Ошибку'], correct: 1 },
+    { q: 'Что вернёт array_search(), если найдено несколько одинаковых элементов?', type: 'single', options: ['Ключ последнего', 'Ключ первого найденного', 'Массив всех ключей', 'false'], correct: 1 },
+    { q: 'Что делает array_unique()?', type: 'single', options: ['Сортирует массив', 'Удаляет повторяющиеся значения', 'Объединяет массивы', 'Считает элементы'], correct: 1 },
+    { q: 'Какие флаги сортировки sort() описаны в лекции?', type: 'multi', options: ['SORT_REGULAR', 'SORT_NUMERIC', 'SORT_STRING', 'SORT_RANDOM'], correct: [0, 1, 2] },
+    { q: 'Что делает ksort()?', type: 'single', options: ['Сортирует по значениям', 'Сортирует по ключам (по возрастанию)', 'Сортирует в обратном порядке', 'Удаляет ключи'], correct: 1 },
+    { q: 'Какая функция сортирует массив с помощью пользовательской функции сравнения?', type: 'single', options: ['sort()', 'uasort()', 'usort()', 'uksort()'], correct: 2 },
+    { q: 'Почему при использовании strpos() рекомендуют сравнение «===»?', type: 'single', options: ['Потому что 0 приводится к false', 'Для скорости', 'Потому что strpos не работает без этого', 'Для корректной работы с Unicode'], correct: 0 },
+    { q: 'Чем отличается explode() от implode()?', type: 'single', options: ['explode объединяет массив, implode разбивает строку', 'explode разбивает строку в массив, implode объединяет массив в строку', 'Они идентичны', 'explode работает только с массивами'], correct: 1 },
+    { q: 'Что делает htmlspecialchars()?', type: 'single', options: ['Удаляет все HTML-теги', 'Преобразует спецсимволы в HTML-сущности', 'Кодирует текст в Base64', 'Удаляет повторы пробелов'], correct: 1 },
+    { q: 'Что возвращает strstr() при отсутствии подстроки?', type: 'single', options: ['Пустую строку', 'false', 'NULL', '0'], correct: 1 }
+  ]
+},
+{
+  num: '6', group: 'PHP', title: 'Лекция 6. Условия и ветвление',
+  questions: [
+    { q: 'Как записывается тернарный оператор в PHP?', type: 'single', options: ['условие ? значение_если_ложь : значение_если_истина', 'условие ? значение_если_истина : значение_если_ложь', 'условие : значение_если_истина ? значение_если_ложь', 'if (условие) значение'], correct: 1 },
+    { q: 'Для чего в конструкции switch используется break?', type: 'single', options: ['Для выхода из цикла', 'Чтобы прервать выполнение и не перейти к следующим case', 'Для завершения программы', 'Для пропуска итерации'], correct: 1 },
+    { q: 'Когда применяется цикл for?', type: 'single', options: ['Когда условие неизвестно заранее', 'Когда известно число итераций', 'Для перебора ключей массива', 'Для бесконечных циклов'], correct: 1 },
+    { q: 'Какие циклы перечислены в лекции?', type: 'multi', options: ['for', 'while', 'do...while', 'foreach', 'repeat...until'], correct: [0, 1, 2, 3] },
+    { q: 'Какой цикл выполнится хотя бы один раз, даже если условие ложно?', type: 'single', options: ['while', 'for', 'do...while', 'foreach'], correct: 2 },
+    { q: 'Для чего предназначен foreach?', type: 'single', options: ['Для перебора массивов', 'Для перебора файлов в каталоге', 'Для работы со строками', 'Для итерации только числовых ключей'], correct: 0 },
+    { q: 'Что выведет скрипт: $number = 10; if ($number > 0) echo "A"; elseif ($number == 0) echo "B"; else echo "C"; ?', type: 'single', options: ['A', 'B', 'C', 'Ничего'], correct: 0 },
+    { q: 'Что означает ветка default в switch?', type: 'single', options: ['Срабатывает всегда', 'Обрабатывается, если ни один case не подошёл', 'Подключение библиотеки', 'Режим отладки'], correct: 1 },
+    { q: 'Какие из перечисленных являются управляющими конструкциями?', type: 'multi', options: ['if / elseif / else', 'switch', 'тернарный оператор', 'echo'], correct: [0, 1, 2] },
+    { q: 'Какой из операторов является логическим «и» в PHP?', type: 'single', options: ['or', '||', '&&', 'xor'], correct: 2 }
+  ]
+}
+];
+
+// Тесты по лекциям 8–15 (PHP)
+var TESTS2 = [
+{
+  num: '6.1', group: 'PHP', title: 'Лекция 6.1. Стандартные функции PHP',
+  questions: [
+    { q: 'Что делает режим fopen("file.txt", "w")?', type: 'single', options: ['Открывает только для чтения', 'Открывает для записи, обрезает файл до нулевой длины и создаёт, если нет', 'Открывает для дозаписи в конец файла', 'Открывает исключительно для чтения с указателем в конец'], correct: 1 },
+    { q: 'Каким флагом в fopen можно создать новый файл, выдав ошибку, если он уже существует?', type: 'single', options: ['w', 'a', 'x', 'r+'], correct: 2 },
+    { q: 'Функция fread требует обязательный аргумент. Что это?', type: 'single', options: ['Имя файла', 'Длина в байтах, которую нужно прочитать', 'Режим доступа', 'Кодировка'], correct: 1 },
+    { q: 'Что возвращает функция file()?', type: 'single', options: ['Строку с содержимым файла', 'Массив, где каждый элемент — строка файла', 'Число записанных байтов', 'Указатель на файл'], correct: 1 },
+    { q: 'Какой атрибут формы нужен для загрузки файлов на сервер?', type: 'single', options: ['method="get"', 'enctype="multipart/form-data"', 'enctype="text/plain"', 'target="_blank"'], correct: 1 },
+    { q: 'Какие параметры всегда присутствуют в массиве $_FILES[]?', type: 'multi', options: ['name', 'type', 'size', 'tmp_name', 'error', 'path'], correct: [0, 1, 2, 3, 4] },
+    { q: 'Что делает move_uploaded_file()?', type: 'single', options: ['Копирует любой файл', 'Проверяет, что файл загружен через HTTP POST, и перемещает его в нужную директорию', 'Удаляет временный файл', 'Загружает файл на внешние серверы'], correct: 1 },
+    { q: 'Что удалит функция unlink()?', type: 'single', options: ['Каталог и его содержимое', 'Только пустой каталог', 'Файл', 'Символьную ссылку на каталог'], correct: 2 },
+    { q: 'Что делает date("H:i:s")?', type: 'single', options: ['Выводит дату в формате Y-m-d', 'Выводит текущее время в формате часы:минуты:секунды', 'Преобразует строку в timestamp', 'Выводит день недели'], correct: 1 },
+    { q: 'Что проверяет функция checkdate()?', type: 'single', options: ['Существование файла', 'Правильность даты (год, месяц, день)', 'Формат строки date()', 'Права доступа к файлу'], correct: 1 }
+  ]
+},
+{
+  num: '7', group: 'PHP', title: 'Лекция 7. Запросы GET и POST',
+  questions: [
+    { q: 'Как передаются параметры в GET-запросе?', type: 'single', options: ['В теле запроса', 'В URL-адресе', 'В заголовках Authorization', 'В cookie'], correct: 1 },
+    { q: 'Какие ограничения есть у GET-запроса?', type: 'multi', options: ['Ограничение длины URL (обычно ~2048 символов)', 'Данные видны в URL', 'Нельзя передавать файлы', 'Нельзя передавать конфиденциальные данные (пароли)'], correct: [0, 1, 3] },
+    { q: 'Где передаются данные в POST-запросе?', type: 'single', options: ['В URL', 'В теле запроса', 'В заголовках', 'На сервере в сессии'], correct: 1 },
+    { q: 'Какие глобальные массивы PHP используются для обработки данных форм?', type: 'multi', options: ['$_GET', '$_POST', '$_REQUEST', '$_FILES'], correct: [0, 1, 2, 3] },
+    { q: 'Что проверяет условие $_SERVER[\'REQUEST_METHOD\'] === \'POST\'?', type: 'single', options: ['Что форма отправлена методом POST', 'Что сервер работает корректно', 'Что пользователь авторизован', 'Что файл загружен'], correct: 0 },
+    { q: 'Какие значения может принимать заголовок Content-Type при отправке формы?', type: 'multi', options: ['application/x-www-form-urlencoded', 'multipart/form-data', 'application/json', 'text/html'], correct: [0, 1, 2] },
+    { q: 'Как защитить вывод данных из $_GET/$_POST от XSS?', type: 'single', options: ['Использовать md5()', 'Выводить через htmlspecialchars()', 'Удалять пробелы', 'Кодировать в Base64'], correct: 1 },
+    { q: 'Какой метод следует выбрать для отправки пароля формой?', type: 'single', options: ['GET — быстрее', 'GET — надёжнее', 'POST — данные передаются в теле, а не в URL', 'PUT'], correct: 2 },
+    { q: 'Какой метод используется для частичного обновления ресурса (по лекции)?', type: 'single', options: ['PATCH', 'PUT', 'POST', 'DELETE'], correct: 0 },
+    { q: 'Сколько методов HTTP описано в лекции помимо GET и POST?', type: 'single', options: ['Один (PUT)', 'Два (PUT и DELETE)', 'Несколько (PUT, DELETE, HEAD, OPTIONS, PATCH и др.)', 'Ни одного'], correct: 2 }
+  ]
+},
+{
+  num: '8', group: 'PHP', title: 'Лекция 8. Работа с файловой системой с помощью PHP',
+  questions: [
+    { q: 'Что означает константа __DIR__ в PHP?', type: 'single', options: ['Полный путь к текущему файлу', 'Каталог текущего файла', 'Корень файловой системы', 'Временный каталог сервера'], correct: 1 },
+    { q: 'Какой режим fopen() создаёт или обрезает файл для записи?', type: 'single', options: ['r', 'w', 'a', 'x'], correct: 1 },
+    { q: 'Какие функции позволяют записать строку в файл одной операцией?', type: 'multi', options: ['file_put_contents()', 'fopen() + fwrite()', 'fputs()', 'scan()'], correct: [0, 1, 2] },
+    { q: 'Что делает функция scandir()?', type: 'single', options: ['Ищет файлы по имени', 'Возвращает массив имён файлов и каталогов в указанном каталоге', 'Удаляет каталог', 'Создаёт каталог'], correct: 1 },
+    { q: 'Как удалить файл в PHP?', type: 'single', options: ['rmdir()', 'delete()', 'unlink()', 'remove()'], correct: 2 },
+    { q: 'Как создать каталог, включая вложенные папки?', type: 'single', options: ['mkdir($dir, 0777)', 'mkdir($dir, 0777, true)', 'rmdir($dir, true)', 'create_dir($dir)'], correct: 1 },
+    { q: 'Чем отличается абсолютный путь от относительного?', type: 'single', options: ['Абсолютный отсчитывается от корня файловой системы, относительный — от текущего скрипта', 'Абсолютный всегда начинается с буквы диска', 'Относительный всегда содержит протокол http://', 'Ничем, это синонимы'], correct: 0 },
+    { q: 'Каким должен быть enctype у формы для загрузки файлов?', type: 'single', options: ['text/plain', 'application/x-www-form-urlencoded', 'multipart/form-data', 'application/json'], correct: 2 },
+    { q: 'Что хранит $_FILES[\'userfile\'][\'tmp_name\']?', type: 'single', options: ['Оригинальное имя файла', 'MIME-тип файла', 'Временный путь, где PHP сохранил загруженный файл', 'Размер файла в байтах'], correct: 2 },
+    { q: 'Что делает функция move_uploaded_file()?', type: 'single', options: ['Перемещает загруженный через POST файл из временной директории в нужную папку', 'Проверяет тип файла', 'Удаляет временный файл', 'Копирует любой файл на сервер'], correct: 0 }
+  ]
+},
+{
+  num: '9', group: 'PHP', title: 'Лекция 9. Организация сессии',
+  questions: [
+    { q: 'Что такое session_start() в PHP?', type: 'single', options: ['Отправка формы', 'Запуск механизма сессий (создание/чтение PHPSESSID)', 'Удаление сессии', 'Подключение к базе данных'], correct: 1 },
+    { q: 'Что такое cookie?', type: 'single', options: ['Файл настроек сервера', 'Небольшие фрагменты данных, которые сервер просит браузер хранить и отправлять обратно', 'Зашифрованный пароль', 'Содержимое тега <script>'], correct: 1 },
+    { q: 'Как клиент узнаёт о существовании сессии?', type: 'single', options: ['Через cookie PHPSESSID', 'Через заголовок User-Agent', 'Через переменную окружения', 'Через файл на сервере'], correct: 0 },
+    { q: 'Где хранится идентификатор сессии по умолчанию?', type: 'single', options: ['В таблице базы данных', 'В cookie (PHPSESSID)', 'В URL', 'В локальном файле браузера'], correct: 1 },
+    { q: 'Почему setcookie() нужно вызывать ДО вывода любого HTML?', type: 'single', options: ['Потому что cookie передаются в заголовках ответа, а заголовки отправляются до тела ответа', 'Потому что HTML ломает cookie', 'Потому что PHP обрабатывает cookie перед HTML', 'Только так требует W3C'], correct: 0 },
+    { q: 'Как удалить cookie в PHP?', type: 'single', options: ['unset($_COOKIE[\'name\'])', 'setcookie(\'name\', \'\', time() - 3600)', 'deleteCookie(\'name\')', 'rmdir($_COOKIE)'], correct: 1 },
+    { q: 'Что означает параметр HttpOnly в cookie?', type: 'single', options: ['Cookie доступен только через HTTP и недоступен из JavaScript', 'Cookie передаётся только по HTTPS', 'Cookie хранится вечно', 'Cookie удаляется при закрытии браузера'], correct: 0 },
+    { q: 'Что правильно для хранения пароля в приложении (по лекции)?', type: 'single', options: ['В открытом виде в $_SESSION', 'В виде хеша MD5', 'Через password_hash() и проверка password_verify()', 'Зашифрованным обратимым алгоритмом'], correct: 2 },
+    { q: 'Почему HTTP является протоколом «без состояния»?', type: 'single', options: ['Он не поддерживает заголовки', 'Сервер не помнит предыдущие запросы клиента сам по себе', 'Он работает только в браузере', 'Каждый запрос — новый TCP-сеанс'], correct: 1 },
+    { q: 'Что делает функция ob_start()?', type: 'single', options: ['Начинает новую сессию', 'Включает буферизацию вывода', 'Открывает файл для записи', 'Отправляет заголовки'], correct: 1 }
+  ]
+},
+{
+  num: '10', group: 'PHP', title: 'Лекция 10. Функции в PHP',
+  questions: [
+    { q: 'Что такое функция в PHP?', type: 'single', options: ['Тип переменной', 'Именованный блок кода, который можно вызывать многократно', 'Специальный комментарий', 'Цикл'], correct: 1 },
+    { q: 'Как объявить функцию в PHP?', type: 'single', options: ['def name() {}', 'function name() {}', 'func name() {}', 'fn name() {}'], correct: 1 },
+    { q: 'Как из функции обратиться к глобальной переменной?', type: 'single', options: ['Объявить её через global', 'Передать $_GLOBALS', 'Использовать window.', 'Нельзя никак'], correct: 0 },
+    { q: 'Какие из перечисленных функций работы с массивами описаны в лекции?', type: 'multi', options: ['array_map()', 'array_filter()', 'array_merge()', 'array_slice()'], correct: [0, 1, 2, 3] },
+    { q: 'Когда появляется вложенная функция?', type: 'single', options: ['Сразу при загрузке файла', 'Только после вызова внешней функции', 'Никогда', 'При наличии global'], correct: 1 },
+    { q: 'Какая функция применяет callback к каждому элементу массива?', type: 'single', options: ['array_filter()', 'array_map()', 'array_merge()', 'array_walk_only()'], correct: 1 },
+    { q: 'Что возвращает пользовательская функция без return?', type: 'single', options: ['false', '0', 'NULL', 'Пустую строку'], correct: 2 },
+    { q: 'Что выведет: function square($x){ return $x*$x; } echo square(5); ?', type: 'single', options: ['10', '25', '5', 'Ошибку'], correct: 1 },
+    { q: 'Какая встроенная функция PHP применяется для работы со временем?', type: 'multi', options: ['date()', 'time()', 'strtotime()', 'checkdate()'], correct: [0, 1, 2, 3] },
+    { q: 'Что означает инкапсуляция логики в функциях?', type: 'single', options: ['Код становится длиннее', 'Внутренняя реализация скрыта, снаружи важен результат', 'Функция работает только с глобальными переменными', 'Код выполняется медленнее'], correct: 1 }
+  ]
+},
+{
+  num: '11', group: 'PHP', title: 'Лекция 11. Основы ООП в PHP',
+  questions: [
+    { q: 'Что такое класс в ООП?', type: 'single', options: ['Конкретный объект', '«Чертёж», по которому создаются объекты', 'Протокол обмена данными', 'Функция'], correct: 1 },
+    { q: 'Что такое объект?', type: 'single', options: ['Шаблон для создания класса', 'Конкретный экземпляр класса, созданный через new', 'Метод класса', 'Свойство класса'], correct: 1 },
+    { q: 'Что означает инкапсуляция?', type: 'single', options: ['Сокрытие внутренней реализации и управление доступом к данным', 'Возможность создавать классы-наследники', 'Единый интерфейс для разных объектов', 'Группировка функций'], correct: 0 },
+    { q: 'Какие уровни доступа к членам класса есть в PHP?', type: 'multi', options: ['public', 'protected', 'private', 'friend'], correct: [0, 1, 2] },
+    { q: 'Что такое наследование?', type: 'single', options: ['Возможность классу получить свойства и методы другого класса (extends)', 'Множество экземпляров класса', 'Группировка методов в trait', 'Создание объекта через new'], correct: 0 },
+    { q: 'Что такое полиморфизм?', type: 'single', options: ['Возможность вызывать один и тот же метод у разных объектов с разным результатом', 'Наследование методов', 'Сокрытие данных', 'Создание нескольких конструкторов'], correct: 0 },
+    { q: 'Что такое композиция?', type: 'single', options: ['Наследование класса', 'Объект содержит другие объекты и использует их функциональность', 'Объединение классов в пространства имён', 'Удаление объектов из памяти'], correct: 1 },
+    { q: 'Для чего нужна автозагрузка (spl_autoload_register)?', type: 'single', options: ['Для удаления старых классов', 'Чтобы PHP сам подключал файлы с классами при их первом использовании', 'Для кэширования классов', 'Для проверки типов'], correct: 1 },
+    { q: 'Что определяет интерфейс Logger { public function log($msg); }?', type: 'single', options: ['Готовый класс логирования', 'Контракт: набор методов, обязательных для реализации', 'Абстрактный класс', 'Трейт'], correct: 1 },
+    { q: 'Что выполняет __construct?', type: 'single', options: ['Удаляет объект', 'Создаёт объект', 'Вызывается при уничтожении объекта', 'Выводит содержимое объекта'], correct: 1 }
+  ]
+},
+{
+  num: '12', group: 'PHP', title: 'Лекция 12. Классы и объекты в PHP',
+  questions: [
+    { q: 'Как создаётся объект класса User?', type: 'single', options: ['User::create()', '$user = new User();', 'User()', 'create User()'], correct: 1 },
+    { q: 'Когда вызывается __construct()?', type: 'single', options: ['При уничтожении объекта', 'При создании объекта (new)', 'При вызове метода', 'Никогда автоматически'], correct: 1 },
+    { q: 'Когда вызывается __destruct()?', type: 'single', options: ['При создании объекта', 'При уничтожении объекта', 'При ошибке', 'При вызове метода'], correct: 1 },
+    { q: 'Как обратиться к статическому свойству класса Math (property $pi)?', type: 'single', options: ['$math->pi', 'Math->$pi', 'Math::$pi', '$Math[pi]'], correct: 2 },
+    { q: 'Что такое модификаторы доступа?', type: 'single', options: ['Определяют, кто может обращаться к свойствам и методам (public/protected/private)', 'Определяют тип возвращаемого значения', 'Указывают namespace', 'Задают порядок вызова методов'], correct: 0 },
+    { q: 'Что делает магический метод __call()?', type: 'single', options: ['Вызывается вместо несуществующего метода', 'Создаёт объект', 'Сравнивает объекты', 'Удаляет метод'], correct: 0 },
+    { q: 'Какие члены класса бывают статическими?', type: 'multi', options: ['Свойства (static $pi)', 'Методы (static function info())', 'Конструкторы', 'Деструкторы'], correct: [0, 1] },
+    { q: 'Что означает ключевое слово extends?', type: 'single', options: ['Подключение файла', 'Наследование класса', 'Реализация интерфейса', 'Использование трейта'], correct: 1 },
+    { q: 'Как наследник может изменить поведение метода родителя?', type: 'single', options: ['Через new', 'Переопределив метод с тем же именем', 'Через extends без изменений', 'Через __call'], correct: 1 },
+    { q: 'Что делает композиция (объект содержит другой объект)?', type: 'single', options: ['Удаляет зависимость классов', 'Позволяет переиспользовать функциональность чужого класса без наследования', 'Запрещает создание объектов', 'Удаляет свойства класса'], correct: 1 }
+  ]
+},
+{
+  num: '13', group: 'PHP', title: 'Лекция 13. Трейты в PHP',
+  questions: [
+    { q: 'Что такое трейт в PHP?', type: 'single', options: ['Особый вид класса', 'Механизм повторного использования кода без наследования (вставляет методы в класс)', 'Интерфейс', 'Пространство имён'], correct: 1 },
+    { q: 'Можно ли создать экземпляр трейта через new?', type: 'single', options: ['Да, как обычный класс', 'Нет, трейт не является классом', 'Только если он public', 'Да, но только внутри namespace'], correct: 1 },
+    { q: 'Как подключается трейт в классе?', type: 'single', options: ['extends', 'implements', 'use', 'include'], correct: 2 },
+    { q: 'Как разрешить конфликт методов двух трейтов?', type: 'single', options: ['PHP сам выберет один', 'Использовать insteadof и as (псевдоним)', 'Трейты нельзя объединять', 'Вызывать только один из них'], correct: 1 },
+    { q: 'Какие интерфейсы и трейты можно создавать и наследовать?', type: 'multi', options: ['Интерфейсы могут наследовать другие интерфейсы', 'Трейт может требовать реализации абстрактного метода в классе', 'Класс может реализовывать несколько интерфейсов', 'Трейт можно наследовать через extends'], correct: [0, 1, 2] },
+    { q: 'Что делает trait_exists(\'Name\')?', type: 'single', options: ['Возвращает список трейтов класса', 'Проверяет, существует ли трейт с указанным именем', 'Удаляет трейт', 'Подключает трейт'], correct: 1 },
+    { q: 'Что такое namespace в PHP?', type: 'single', options: ['Способ группировки классов/функций/констант для избежания конфликтов имён', 'Механизм наследования', 'Способ подключения файлов', 'Директива автозагрузки'], correct: 0 },
+    { q: 'Что означает use App\\Models\\User;?', type: 'single', options: ['Подключение трейта User', 'Импорт класса User из пространства имён App\\Models', 'Наследование класса User', 'Создание объекта User'], correct: 1 },
+    { q: 'Чем интерфейс отличается от трейта?', type: 'single', options: ['Интерфейс содержит только сигнатуры методов (контракт), трейт — реализации методов', 'Интерфейс нельзя реализовать', 'Трейт нельзя использовать', 'Они полностью взаимозаменяемы'], correct: 0 },
+    { q: 'Как обратиться к глобальному классу (например, DateTime) внутри namespace?', type: 'single', options: ['new DateTime()', 'new \\DateTime()', 'global DateTime', 'use DateTime'], correct: 1 }
+  ]
+},
+{
+  num: '14', group: 'PHP', title: 'Лекция 14. Клиентская часть веб-приложений',
+  questions: [
+    { q: 'Что такое клиент в клиент-серверной архитектуре?', type: 'single', options: ['Программа, хранящая данные', 'Программа/устройство, отправляющее запросы серверу (браузер, мобильное приложение и др.)', 'База данных', 'Кэш сервера'], correct: 1 },
+    { q: 'Что такое PHP-FPM?', type: 'single', options: ['Веб-сервер', 'Система, запускающая и управляющая процессами PHP', 'Модуль Apache для Python', 'Фреймворк'], correct: 1 },
+    { q: 'Что такое Node.js по отношению к серверам (по лекции)?', type: 'single', options: ['Только обработчик PHP', 'Среда выполнения JS, которая сама является веб-сервером', 'Только прокси', 'Только статический сервер'], correct: 1 },
+    { q: 'Какие клиенты описаны в лекции?', type: 'multi', options: ['Браузер (Chrome, Firefox)', 'JavaScript-клиенты (fetch, AJAX)', 'Мобильные приложения (Android, iOS)', 'IoT-устройства'], correct: [0, 1, 2, 3] },
+    { q: 'Чем отличается Apache от Nginx?', type: 'single', options: ['Apache — только прокси, Nginx — только PHP', 'Apache — модульный, гибкий, работает с динамикой через mod_php/PHP-FPM; Nginx — быстрый, работает с PHP только через PHP-FPM', 'Они полностью идентичны', 'Nginx работает только на Windows'], correct: 1 },
+    { q: 'Какие методы HTTP чаще используются для API?', type: 'multi', options: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS — для CORS'], correct: [0, 1, 2, 3] },
+    { q: 'Какие части HTTP-запроса описаны в лекции?', type: 'multi', options: ['Метод', 'URL', 'Заголовки', 'Тело'], correct: [0, 1, 2, 3] },
+    { q: 'Чем mysqli отличается от PDO?', type: 'single', options: ['mysqli работает только с MySQL, PDO — с множеством СУБД', 'mysqli быстрее PDO в 100 раз', 'PDO не поддерживает подготовленные выражения', 'mysqli нельзя использовать с ООП'], correct: 0 },
+    { q: 'Что такое подготовленные выражения (prepared statements)?', type: 'single', options: ['Кеширование результатов запроса', 'Плейсхолдеры в SQL-запросе, подставляемые безопасно (защита от SQL-инъекций)', 'Триггеры в базе данных', 'Хранимые процедуры'], correct: 1 },
+    { q: 'Как отправляются данные формы без перезагрузки страницы?', type: 'single', options: ['Через AJAX/fetch в фоне', 'Только через кнопку Submit', 'Через iframe', 'Только через GET'], correct: 0 }
+  ]
+}
+];
+
+// Тесты по лекциям 15–25 (Node.js, CLI, OS, Streams, БД)
+var TESTS3 = [
+{
+  num: '15', group: 'Node.js', title: 'Лекция 15. Введение в Node.js',
+  questions: [
+    { q: 'Что такое Node.js?', type: 'single', options: ['Браузер от Google', 'Среда выполнения JavaScript вне браузера (движок V8)', 'Фреймворк для CSS', 'Система управления базами данных'], correct: 1 },
+    { q: 'Какой механизм использует Node.js для работы с асинхронными операциями?', type: 'single', options: ['Многопоточность с потоками на каждый запрос', 'Событийно-ориентированная (EventDriven) архитектура и Event Loop', 'Синхронный блокирующий ввод', 'Полное отсутствие ожидания'], correct: 1 },
+    { q: 'Какая система модулей используется в Node.js по умолчанию?', type: 'single', options: ['ES Modules (import/export)', 'CommonJS (require/module.exports)', 'AMD', 'UMD'], correct: 1 },
+    { q: 'Какие преимущества Node.js перечислены в лекции?', type: 'multi', options: ['Один язык — JavaScript и на клиенте, и на сервере', 'Высокая производительность благодаря V8 (JIT-компиляция)', 'Большое количество одновременных подключений без потоков', 'Встроенная поддержка PHP'], correct: [0, 1, 2] },
+    { q: 'Что делает require(\'./math\')?', type: 'single', options: ['Создаёт новый файл math.js', 'Импортирует модуль из файла ./math.js', 'Удаляет модуль из кэша', 'Экспортирует функцию'], correct: 1 },
+    { q: 'Как включить ES Modules в проекте Node.js?', type: 'single', options: ['Добавить "type": "module" в package.json (или использовать расширение .mjs)', 'Установить пакет esmodule', 'Переименовать файлы в .esm', 'Использовать только import'], correct: 0 },
+    { q: 'Что хранит package.json?', type: 'multi', options: ['Имя и версию проекта', 'Список dependencies и devDependencies', 'Скрипты запуска (scripts)', 'Пароли пользователей'], correct: [0, 1, 2] },
+    { q: 'В какую папку устанавливаются зависимости проекта?', type: 'single', options: ['node_modules/', 'vendor/', 'dependencies/', 'modules/'], correct: 0 },
+    { q: 'Зачем нужен package-lock.json?', type: 'single', options: ['Для блокировки файла от изменений', 'Для фиксирования точных версий и дерева зависимостей, чтобы проект ставился одинаково везде', 'Для хранения ключей API', 'Для ускорения работы сервера'], correct: 1 },
+    { q: 'Что означает команда npm init -y?', type: 'single', options: ['Устанавливает все пакеты', 'Создаёт package.json с настройками по умолчанию', 'Запускает сервер', 'Удаляет папку node_modules'], correct: 1 }
+  ]
+},
+{
+  num: '16.1', group: 'Node.js', title: 'Лекция 16.1. Пакетный менеджер npm',
+  questions: [
+    { q: 'Что такое npm?', type: 'single', options: ['Новый PHP-фреймворк', 'Пакетный менеджер Node.js (Node Package Manager)', 'Система управления базами данных', 'Редактор кода'], correct: 1 },
+    { q: 'Какой командой устанавливается пакет?', type: 'single', options: ['npm get <pkg>', 'npm add <pkg>', 'npm install <pkg>', 'npm load <pkg>'], correct: 2 },
+    { q: 'Как посмотреть версию установленного npm?', type: 'single', options: ['npm version', 'npm -v', 'npm --check', 'npm list npm'], correct: 1 },
+    { q: 'Какие секции зависимостей есть в package.json?', type: 'multi', options: ['dependencies', 'devDependencies', 'peerDependencies (вне лекции)', 'optionalDependencies (вне лекции)'], correct: [0, 1] },
+    { q: 'Что делает строка версий "^4.18.2"?', type: 'single', options: ['Только версия 4.18.2', 'Любая версия >=4.18.2 и <5.0.0', 'Любая версия 4.x.x', 'Только мажорные версии'], correct: 1 },
+    { q: 'Что делает строка версий "~4.18.2"?', type: 'single', options: ['Любая версия >=4.18.2 и <4.19.0', 'Любая версия 4.x', 'Только 4.18.2', 'Любая версия, совместимая с 4.18.2 по мажору'], correct: 0 },
+    { q: 'Что делает команда npm uninstall lodash?', type: 'single', options: ['Устанавливает lodash', 'Удаляет пакет и обновляет package.json', 'Обновляет lodash', 'Публикует lodash'], correct: 1 },
+    { q: 'Как npm семантическое версионирование? Какой номер увеличивается при обратносовместимом добавлении функциональности?', type: 'single', options: ['major', 'minor', 'patch', 'build'], correct: 1 },
+    { q: 'Что такое nodemon?', type: 'single', options: ['Фреймворк для тестирования', 'Инструмент автоматического перезапуска сервера при изменении файлов', 'Пакетный менеджер', 'Линтер'], correct: 1 },
+    { q: 'Как запустить команду start из секции scripts файла package.json?', type: 'single', options: ['npm run start', 'npm start', 'node start', 'npm exec start'], correct: 1 }
+  ]
+},
+{
+  num: '16.2', group: 'Node.js', title: 'Лекция 16.2. Общие сведения о NPM',
+  questions: [
+    { q: 'Из каких двух частей состоит NPM?', type: 'multi', options: ['CLI (командная строка)', 'Онлайн-реестр (npmjs.com)', 'Графический интерфейс', 'База данных'], correct: [0, 1] },
+    { q: 'Что делает команда npm install <pkg> без флагов?', type: 'single', options: ['Ставит пакет глобально', 'Ставит пакет локально и записывает его в dependencies', 'Ставит пакет и записывает в devDependencies', 'Удаляет пакет'], correct: 1 },
+    { q: 'Что означает флаг -g в npm install -g?', type: 'single', options: ['Пакет ставится глобально, доступен из любой точки системы', 'Пакет ставится как devDependency', 'Пакет не записывается в package.json', 'Установка пропускает зависимости'], correct: 0 },
+    { q: 'Какой командой ставят devDependency (например, eslint)?', type: 'single', options: ['npm install eslint --save-dev', 'npm install eslint -g', 'npm add eslint', 'npm install eslint --dev-only'], correct: 0 },
+    { q: 'Как опубликовать собственный пакет в реестр?', type: 'multi', options: ['npm login', 'npm publish', 'npm upload', 'npm push'], correct: [0, 1] },
+    { q: 'Что показывает команда npm list --depth=0?', type: 'single', options: ['Полное дерево зависимостей', 'Только зависимости верхнего уровня', 'Историю версий', 'Предупреждения безопасности'], correct: 1 },
+    { q: 'Что показывает npm update?', type: 'single', options: ['Версию npm', 'Список обновляемых пакетов', 'Обновляет пакеты в рамках разрешённых версий', 'Удаляет устаревшие пакеты'], correct: 2 },
+    { q: 'Где хранятся исполняемые команды глобальных пакетов?', type: 'single', options: ['node_modules текущего проекта', 'В системной папке (доступны из любого каталога)', 'В package.json', 'В кэше npm'], correct: 1 },
+    { q: 'Что такое «пакет» в терминологии npm?', type: 'single', options: ['Набор файлов проекта', 'Набор функциональности, распространяемый через реестр', 'Архив исходников', 'Конфигурационный файл'], correct: 1 },
+    { q: 'Что делает npm uninstall -g nodemon?', type: 'single', options: ['Удаляет nodemon из текущего проекта', 'Удаляет глобальный nodemon', 'Обновляет nodemon', 'Публикует nodemon'], correct: 1 }
+  ]
+},
+{
+  num: '17', group: 'Node.js', title: 'Лекция 17. Цикл событий (Event Loop)',
+  questions: [
+    { q: 'Что такое EventEmitter?', type: 'single', options: ['Модуль для работы с файлами', 'Класс из модуля events — генератор событий', 'Модуль HTTP', 'Плагин Express'], correct: 1 },
+    { q: 'Какой метод регистрирует обработчик события?', type: 'single', options: ['emit()', 'on()', 'once()', 'addListener0()'], correct: 1 },
+    { q: 'Что делает once()?', type: 'single', options: ['Регистрирует обработчик, который сработает только один раз', 'Удаляет все обработчики', 'Регистрирует два обработчика', 'Запускает событие'], correct: 0 },
+    { q: 'Как передать аргументы обработчику через emit()?', type: 'single', options: ['emit(\'event\', arg1, arg2)', 'emit(\'event\', [arg1, arg2])', 'emit(args, \'event\')', 'Нельзя передавать аргументы'], correct: 0 },
+    { q: 'Какие методы EventEmitter описаны в лекции?', type: 'multi', options: ['on / addListener', 'emit', 'once', 'prependListener / prependOnceListener', 'removeListener / removeAllListeners'], correct: [0, 1, 2, 3, 4] },
+    { q: 'Что такое phases Event Loop?', type: 'multi', options: ['Timers', 'Pending callbacks', 'Poll', 'Check (setImmediate)', 'Close callbacks'], correct: [0, 1, 2, 3, 4] },
+    { q: 'Что такое process.nextTick?', type: 'single', options: ['Выполняет функцию в следующем тике цикла событий, до перехода к следующей фазе', 'Выполняет через всю итерацию Event Loop', 'Выполняет сразу, но после setImmediate', 'Такой функции нет'], correct: 0 },
+    { q: 'Как Node.js узнаёт, что асинхронная операция завершена?', type: 'single', options: ['Через polling основного потока в бесконечном цикле', 'Когда система (OS) генерирует событие, цикл событий вызывает обработчик', 'Через таймеры', 'Через callback queue и Web API'], correct: 1 },
+    { q: 'Когда сработает setImmediate по сравнению с process.nextTick?', type: 'single', options: ['setImmediate выполнится до nextTick', 'nextTick выполнится раньше setImmediate', 'Они выполняются в случайном порядке', 'Они выполняются одновременно'], correct: 1 },
+    { q: 'Какой порядок вывода у скрипта с console.log, process.nextTick, setTimeout(0), setImmediate?', type: 'single', options: ['log → nextTick → timeout → immediate', 'nextTick → timeout → immediate → log', 'log → timeout → immediate → nextTick', 'immediate → nextTick → timeout → log'], correct: 0 }
+  ]
+},
+{
+  num: '18', group: 'Node.js', title: 'Лекция 18. Асинхронное программирование в Node.js',
+  questions: [
+    { q: 'Что такое callback в контексте асинхронных операций?', type: 'single', options: ['Объект результата операции', 'Функция, вызываемая после завершения асинхронной операции', 'Способ отмены операции', 'Модуль fs'], correct: 1 },
+    { q: 'Что такое Promise?', type: 'single', options: ['Функция обратного вызова', 'Объект, представляющий результат асинхронной операции, который может завершиться успешно или с ошибкой', 'Синхронный аналог колбэка', 'Метод fs.writeFile'], correct: 1 },
+    { q: 'Какие методы есть у Promise?', type: 'multi', options: ['.then()', '.catch()', '.finally()', '.done()'], correct: [0, 1, 2] },
+    { q: 'Что делает util.promisify()?', type: 'single', options: ['Преобразует промисы в колбэки', 'Преобразует функции с колбэками в функции, возвращающие промис', 'Создаёт новый промис', 'Кеширует результаты'], correct: 1 },
+    { q: 'Что делает async function?', type: 'single', options: ['Создаёт новую среду', 'Объявляет асинхронную функцию, внутри которой можно использовать await', 'Выполняет функцию в потоке', 'Блокирует поток'], correct: 1 },
+    { q: 'Что делает await?', type: 'single', options: ['Ускоряет выполнение', 'Приостанавливает выполнение функции до получения результата промиса', 'Запускает таймер', 'Удаляет промис'], correct: 1 },
+    { q: 'Как обрабатываются ошибки в async/await?', type: 'single', options: ['Через .catch() только', 'Через try/catch', 'Через if(err)', 'Через process.on'], correct: 1 },
+    { q: 'Что такое «Callback Hell»?', type: 'single', options: ['Отсутствие колбэков', 'Сложные цепочки вложенных колбэков, делающие код трудночитаемым', 'Ошибки в колбэках', 'Медленные колбэки'], correct: 1 },
+    { q: 'Как обрабатываются ошибки в промисах?', type: 'single', options: ['Через try/catch внутри then()', 'Через .catch()', 'Через if(err)', 'Автоматически'], correct: 1 },
+    { q: 'Какой современный стиль асинхронного кода рекомендует лекция?', type: 'single', options: ['Вложенные колбэки', 'Многоуровневые промисы', 'async/await', 'Только синхронные вызовы'], correct: 2 }
+  ]
+},
+{
+  num: '19', group: 'Node.js', title: 'Лекция 19. Работа с файлами в Node.js',
+  questions: [
+    { q: 'Какой модуль встроенный и отвечает за работу с файловой системой в Node.js?', type: 'single', options: ['file', 'fs', 'files', 'filesystem'], correct: 1 },
+    { q: 'Что произойдёт, если вызвать fs.readFile без указания кодировки?', type: 'single', options: ['Выдаст ошибку', 'Вернёт Buffer', 'Вернёт строку UTF-8', 'Вернёт массив строк'], correct: 1 },
+    { q: 'Чем отличается fs.readFileSync от fs.readFile?', type: 'single', options: ['readFileSync выполняет чтение синхронно и блокирует поток', 'readFileSync работает быстрее всегда', 'readFileSync читает только бинарные файлы', 'Они ничем не отличаются'], correct: 0 },
+    { q: 'Какие функции отвечают за запись в файл (по лекции)?', type: 'multi', options: ['fs.writeFile', 'fs.writeFileSync', 'fs.appendFile', 'fs.appendFileSync'], correct: [0, 1, 2, 3] },
+    { q: 'Как дописать данные в конец файла?', type: 'single', options: ['Перезаписать через writeFile', 'Использовать appendFile или флаг "a" в writeFile', 'Использовать readFile + writeFile', 'Просто fs.add("file.txt")'], correct: 1 },
+    { q: 'Что возвращает fs.stat() при успехе?', type: 'single', options: ['Строку с содержимым', 'Объект stats (isFile, isDirectory, size и т.д.)', 'Число байтов', 'true/false'], correct: 1 },
+    { q: 'Как удалить файл асинхронно?', type: 'single', options: ['fs.delete(path, cb)', 'fs.unlink(path, cb)', 'fs.remove(path, cb)', 'fs.unlinkSync(path) только'], correct: 1 },
+    { q: 'Какой метод позволяет создать каталог?', type: 'single', options: ['fs.mkdir / fs.mkdirSync', 'fs.createDir', 'fs.makeDir', 'fs.newDir'], correct: 0 },
+    { q: 'Что возвращает fs.readdir("test", cb) вторым параметром в колбэке?', type: 'single', options: ['Содержимое файлов', 'Массив имён файлов и папок каталога', 'Статистику каталога', 'Код ошибки'], correct: 1 },
+    { q: 'Можно ли с помощью fs.rmdir удалить непустой каталог?', type: 'single', options: ['Да, удалит всё содержимое', 'Нет, каталог должен быть пустым (в этой лекции)', 'Да, с флагом recursive', 'Только на Linux'], correct: 1 }
+  ]
+},
+{
+  num: '19.1', group: 'Node.js', title: 'Лекция 19.1. Работа с файловой системой в Node.js',
+  questions: [
+    { q: 'Какие три варианта API у модуля fs?', type: 'multi', options: ['fs.sync (синхронные)', 'fs.promises (промисы)', 'fs.callback (колбэки)', 'fs.asyncAwait'], correct: [0, 1, 2] },
+    { q: 'Как подключить модуль fs с промисами?', type: 'single', options: ['require("fs/promises")', 'require("fs.promises")', 'require("promises/fs")', 'import fs from "fs"'], correct: 0 },
+    { q: 'Как переименовать файл или каталог в Node.js?', type: 'single', options: ['fs.move(path, newPath)', 'fs.rename(old, new)', 'fs.renameFile(old, new)', 'fs.changeName(old, new)'], correct: 1 },
+    { q: 'Какие типовые ошибки обрабатываются через err.code?', type: 'multi', options: ['ENOENT (файл не найден)', 'EACCES (нет прав доступа)', 'EEXIST (каталог уже существует)', 'ECONNREFUSED (сервер недоступен — используется для БД)'], correct: [0, 1, 2] },
+    { q: 'Для чего нужен модуль path?', type: 'single', options: ['Для работы с сетями', 'Для работы с путями (join, normalize, parse, basename)', 'Для работы с потоками', 'Для парсинга JSON'], correct: 1 },
+    { q: 'Что делает path.join("folder", "file.txt")?', type: 'single', options: ['Объединяет пути в одну строку с правильными разделителями', 'Нормализует путь', 'Создаёт файл', 'Возвращает имя файла'], correct: 0 },
+    { q: 'Что такое Streams в контексте файловой системы?', type: 'single', options: ['Способ работы с большими файлами по частям, не загружая всё в память', 'Способ сжатия файлов', 'Кеширование файлов', 'Тип файла'], correct: 0 },
+    { q: 'Что делает метод .pipe()?', type: 'single', options: ['Завершает поток', 'Передаёт данные из Readable-потока в Writable-поток', 'Создаёт поток', 'Очищает поток'], correct: 1 },
+    { q: 'Что возвращает path.parse("/home/user/file.txt")?', type: 'single', options: ['Строку пути', 'Объект { root, dir, base, ext, name }', 'Массив частей пути', 'Имя файла'], correct: 1 },
+    { q: 'Можно ли с помощью fs.rename переместить файл в другой каталог?', type: 'single', options: ['Нет, только переименование в той же папке', 'Да, если передать другой путь', 'Только с флагом recursive', 'Только через fs.copy'], correct: 1 }
+  ]
+},
+{
+  num: '20', group: 'Node.js', title: 'Лекция 20. Сведения о протоколе HTTP',
+  questions: [
+    { q: 'Как создать HTTP-сервер на Node.js?', type: 'single', options: ['http.createServer((req, res) => { ... })', 'new http.Server()', 'http.listen(3000)', 'require("http").start()'], correct: 0 },
+    { q: 'Как запустить сервер на порту 3000?', type: 'single', options: ['server.run(3000)', 'server.start(3000)', 'server.listen(3000)', 'server.open(3000)'], correct: 2 },
+    { q: 'Что содержит объект req?', type: 'multi', options: ['req.url', 'req.method', 'req.headers', 'req.body'], correct: [0, 1, 2] },
+    { q: 'Что содержит объект res?', type: 'multi', options: ['res.writeHead(status, headers)', 'res.end(data)', 'res.write(data)', 'res.send(data)'], correct: [0, 1, 2] },
+    { q: 'Что делает res.writeHead(200, {"Content-Type": "text/html"})?', type: 'single', options: ['Устанавливает статус и заголовки ответа', 'Отправляет тело ответа', 'Завершает ответ', 'Создаёт файл'], correct: 0 },
+    { q: 'Как встроенный модуль Node.js называется для работы с HTTP?', type: 'single', options: ['net', 'http', 'https only', 'web'], correct: 1 },
+    { q: 'Какие HTTP-методы упоминаются в лекции 20?', type: 'multi', options: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], correct: [0, 1, 2, 3, 4] },
+    { q: 'Что означает маршрутизация?', type: 'single', options: ['Удаление маршрутов', 'Выбор обработчика в зависимости от URL и метода запроса', 'Кеширование URL', 'Создание ссылок'], correct: 1 },
+    { q: 'Какая ошибка возвращается, если запрошенный путь не соответствует ни одному маршруту (по лекции)?', type: 'single', options: ['200', '403', '404', '500'], correct: 2 },
+    { q: 'Как отдавать статические файлы (HTML/CSS/JS)?', type: 'single', options: ['res.sendFile() обязательно', 'Через fs.readFile и res.end(data), либо потоком fs.createReadStream().pipe(res)', 'Через global.css', 'Только через Express'], correct: 1 }
+  ]
+},
+{
+  num: '20.1', group: 'Node.js', title: 'Лекция 20.1. Создание HTTP-сервера на Node.js',
+  questions: [
+    { q: 'Что принимает createServer в качестве параметра?', type: 'single', options: ['Объект конфигурации', 'Функцию-обработчик (request, response)', 'Номер порта', 'Путь к файлу'], correct: 1 },
+    { q: 'Что означает request.url в объекте request?', type: 'single', options: ['Полный URL с протоколом', 'Запрошенный путь (например, "/home")', 'Доменное имя', 'Строка запроса целиком'], correct: 1 },
+    { q: 'Какой метод объекта response должен вызываться в каждом запросе?', type: 'single', options: ['write()', 'end()', 'finish()', 'send()'], correct: 1 },
+    { q: 'Как установить только один заголовок ответа?', type: 'single', options: ['response.setHeader(name, value)', 'response.header(name, value)', 'response.addHeader(name, value)', 'response.set(name, value)'], correct: 0 },
+    { q: 'Как организовать переадресацию (редирект) с / на /newpage?', type: 'single', options: ['response.statusCode = 301 + Location-заголовок', 'response.redirect("/newpage") без фреймворка', 'res.writeHead(302, {Location: "/newpage"}) + response.end()', 'Установить Content-Type'], correct: 2 },
+    { q: 'Какой статусный код для временной переадресации?', type: 'single', options: ['301', '302', '404', '500'], correct: 1 },
+    { q: 'Как получить тело POST-запроса в голом Node.js?', type: 'multi', options: ['Нужно слушать request.on("data", chunk => ...)', 'Ожидать request.on("end", ...)', 'Сразу использовать request.body', 'Объект request — это поток (Readable)'], correct: [0, 1, 3] },
+    { q: 'Что делаетBuffer.concat(buffers)?', type: 'single', options: ['Объединяет массив буферов в один Buffer', 'Разбивает строку', 'Очищает память', 'Кодирует в Base64'], correct: 0 },
+    { q: 'Что выведет сервер при обращении к несуществующему файлу (по примеру лекции с fs.access)?', type: 'single', options: ['200 OK с пустым телом', '404 с сообщением об ошибке', '500', 'Пустой ответ'], correct: 1 },
+    { q: 'Какую особенность имеет объект request при получении тела?', type: 'single', options: ['Он содержит тело целиком сразу', 'Данные приходят чанками и нужно их собирать', 'Нельзя получить тело вообще', 'Он завершает соединение после заголовков'], correct: 1 }
+  ]
+},
+{
+  num: '21', group: 'Node.js', title: 'Лекция 21. Серверные фреймворки: Koa.js',
+  questions: [
+    { q: 'Какой принцип лежит в основе Koa по сравнению с Express?', type: 'single', options: ['Многопоточная модель', 'Middleware-цепочка на async/await («луковичная модель»)', 'Синхронная модель', 'Отсутствие middleware'], correct: 1 },
+    { q: 'Есть ли встроенный роутер в Koa?', type: 'single', options: ['Да, @koa/router встроен', 'Нет, используется пакет @koa/router', 'Да, koa-router встроен', 'Koa не поддерживает маршрутизацию'], correct: 1 },
+    { q: 'Какие свойства/методы чаще всего используются у ctx?', type: 'multi', options: ['ctx.body', 'ctx.status', 'ctx.request / ctx.response', 'ctx.headers, ctx.params'], correct: [0, 1, 2, 3] },
+    { q: 'Как обрабатываются ошибки в Koa?', type: 'single', options: ['Отдельным middleware с err, req, res, next', 'Через try/catch внутри async-middleware', 'Через process.on(\'error\')', 'Никак'], correct: 1 },
+    { q: 'Что такое middleware в Express/Koa?', type: 'single', options: ['Отдельное приложение', 'Функция-перехватчик на пути запроса от клиента к обработчику', 'Маршрут', 'Контроллер'], correct: 1 },
+    { q: 'Какие популярные модули Express перечислены в лекции?', type: 'multi', options: ['body-parser (встроен с 4.16+)', 'cookie-parser', 'express-session', 'helmet', 'morgan'], correct: [0, 1, 2, 3, 4] },
+    { q: 'Чем отличается req/res в Express от ctx в Koa?', type: 'single', options: ['В Koa ctx объединяет запрос и ответ в один объект', 'Ничем', 'ctx — это fs', 'Express не имеет req/res'], correct: 0 },
+    { q: 'Какие сильные стороны Express перечислены в лекции?', type: 'multi', options: ['Простая и гибкая маршрутизация (в т.ч. параметры /users/:id)', 'Middleware-архитектура', 'Огромная экосистема (десятки тысяч компаний в продакшене)', 'Встроенная поддержка TypeScript'], correct: [0, 1, 2] },
+    { q: 'Как подключить роутер в Koa?', type: 'single', options: ['app.use(router.routes())', 'app.router(router)', 'app.attach(router)', 'Koa не поддерживает middleware'], correct: 0 },
+    { q: 'Кто создал Koa?', type: 'single', options: ['Авторы Express', 'Google', 'Microsoft', 'Авторы Nginx'], correct: 0 }
+  ]
+},
+{
+  num: '22', group: 'Node.js', title: 'Лекция 22. Понятие о CLI',
+  questions: [
+    { q: 'Что такое CLI?', type: 'single', options: ['Connection Line Interface', 'Command Line Interface — интерфейс работы через текстовые команды', 'Common Language Interface', 'Client Library Interface'], correct: 1 },
+    { q: 'Как получить аргументы командной строки в Node.js?', type: 'single', options: ['process.args', 'process.argv', 'process.arguments', 'process.params'], correct: 1 },
+    { q: 'Зачем process.argv.slice(2)?', type: 'single', options: ['Чтобы удалить название файла', 'Чтобы отбросить путь к node и путь к файлу и оставить пользовательские аргументы', 'Чтобы ограничить длину массива до 2', 'Чтобы распарсить флаги'], correct: 1 },
+    { q: 'Какие модули упрощают обработку аргументов и интерактивные диалоги?', type: 'multi', options: ['commander', 'inquirer', 'readline', 'yargs (упомянут?)'], correct: [0, 1, 2] },
+    { q: 'Что делает .option(\'-n, --name <type>\', \'имя\') в commander?', type: 'single', options: ['Устанавливает версию', 'Объявляет опцию/флаг с сокращённым и длинным именем', 'Создаёт команду', 'Запускает программу'], correct: 1 },
+    { q: 'Что означает шебанг #!/usr/bin/env node?', type: 'single', options: ['Комментарий', 'Указывает интерпретатор, который надо использовать для выполнения файла', 'Устанавливает переменную окружения', 'Отключает запуск'], correct: 1 },
+    { q: 'Что такое bin в package.json?', type: 'single', options: ['Папка для скомпилированных файлов', 'Карта «имя команды → путь к файлу», делает пакет глобальной командой', 'Папка node_modules', 'Раздел для скриптов'], correct: 1 },
+    { q: 'Как сделать файл исполняемым и запустить mycli глобально?', type: 'multi', options: ['chmod +x app.js', 'Добавить шебанг в начало файла', 'npm link', 'npm publish'], correct: [0, 1, 2] },
+    { q: 'Какие инструменты позволяют превращать Node.js-приложение в исполняемый файл без Node.js?', type: 'multi', options: ['pkg', 'nexe', 'esbuild', 'webpack'], correct: [0, 1] },
+    { q: 'Какая библиотека упрощает ввод вопросов (input, list) в терминале?', type: 'single', options: ['prompt', 'inquirer', 'ask', 'query'], correct: 1 }
+  ]
+},
+{
+  num: '23', group: 'Node.js', title: 'Лекция 23. Модули OS и HTTP в Node.js',
+  questions: [
+    { q: 'Как получить тип операционной системы?', type: 'single', options: ['os.name()', 'os.type()', 'os.platform()', 'os.release()'], correct: 1 },
+    { q: 'Что возвращает os.userInfo()?', type: 'single', options: ['Путь к домашней папке', 'Объект с информацией о текущем пользователе (username)', 'Имя компьютера', 'Список пользователей системы'], correct: 1 },
+    { q: 'Какие методы модуля os описаны в лекции?', type: 'multi', options: ['os.cpus()', 'os.totalmem() / os.freemem()', 'os.uptime()', 'os.homedir()', 'os.networkInterfaces()'], correct: [0, 1, 2, 3, 4] },
+    { q: 'Как узнать количество ядер процессора?', type: 'single', options: ['os.cpus().length', 'os.cpuCount()', 'os.cores()', 'os.threads()'], correct: 0 },
+    { q: 'Какой метод EventEmitter сработает только один раз?', type: 'single', options: ['on()', 'once()', 'emit()', 'addListener()'], correct: 1 },
+    { q: 'Какой модуль создавать HTTP-сервер?', type: 'single', options: ['os', 'net', 'http', 'express'], correct: 2 },
+    { q: 'Как создать сервер в базовом варианте (по лекции)?', type: 'single', options: ['http.createServer((req, res) => { ... })', 'new http.Server()', 'http.listen()', 'require("http").Server'], correct: 0 },
+    { q: 'Что делает res.writeHead(200, { "Content-Type": "text/plain" })?', type: 'single', options: ['Отправляет тело ответа', 'Устанавливает статус и заголовки', 'Закрывает соединение', 'Создаёт файл'], correct: 1 },
+    { q: 'Как обработать тело POST-запроса?', type: 'single', options: ['req.body сразу', 'Слушать req.on("data") и собирать чанки, затем req.on("end")', 'res.read()', 'readFile()'], correct: 1 },
+    { q: 'Как сделать редирект (302) на /newpage?', type: 'single', options: ['res.writeHead(302, { Location: "/newpage" }) + res.end()', 'res.redirect("/newpage")', 'res.status(302)', 'res.end("/newpage")'], correct: 0 }
+  ]
+},
+{
+  num: '24', group: 'Node.js', title: 'Лекция 24. Работа с потоками (Streams)',
+  questions: [
+    { q: 'Что такое поток (Stream) в Node.js?', type: 'single', options: ['Отдельный процесс', 'Абстракция для обработки данных по частям, без загрузки всего объёма в память', 'Тип файла', 'Модуль событий'], correct: 1 },
+    { q: 'Какие типы потоков существуют в Node.js?', type: 'multi', options: ['Readable', 'Writable', 'Duplex', 'Transform'], correct: [0, 1, 2, 3] },
+    { q: 'Какой тип потока — частный случай Duplex, изменяющий данные при проходе (например, gzip)?', type: 'single', options: ['Duplex', 'Transform', 'PassThrough', 'Readable'], correct: 1 },
+    { q: 'Что такое backpressure?', type: 'single', options: ['Утечка памяти', 'Ситуация, когда данные поступают быстрее, чем потребитель успевает их обрабатывать (потоки сами притормаживают чтение)', 'Ошибка записи', 'Закрытие потока'], correct: 1 },
+    { q: 'В каком режиме по умолчанию находится Readable поток?', type: 'single', options: ['flowing', 'paused', 'objectMode', 'piped'], correct: 1 },
+    { q: 'Чем pipe() отличается от pipeline()?', type: 'single', options: ['pipe() — синхронный, pipeline() — асинхронный', 'pipeline() корректно обрабатывает ошибки, очищает ресурсы и принимает callback', 'Они идентичны', 'pipe() работает только с файлами'], correct: 1 },
+    { q: 'Что означает highWaterMark?', type: 'single', options: ['Максимальный размер файла', 'Порог внутреннего буфера потока (в байтах или объектах)', 'Количество слушателей', 'Максимальная скорость соединения'], correct: 1 },
+    { q: 'Как включить объектный режим (objectMode)?', type: 'single', options: ['Создать Transform с { objectMode: true }', 'Установить флаг --object в коде', 'objectMode включается автоматически', 'Только для Readable'], correct: 0 },
+    { q: 'Какое событие Readable срабатывает, когда данные закончились?', type: 'single', options: ['"data"', '"readable"', '"end"', '"finish"'], correct: 2 },
+    { q: 'Что делает .pipe() по сравнению с ручной пересылкой чанков?', type: 'single', options: ['Работает всегда быстрее', 'Автоматически управляет передачей данных, включая backpressure', 'Кэширует данные', 'Ничем не отличается'], correct: 1 }
+  ]
+},
+{
+  num: '25', group: 'Node.js', title: 'Лекция 25. Node.js и базы данных',
+  questions: [
+    { q: 'Чем реляционные БД (SQL) отличаются от NoSQL (MongoDB) по схеме данных?', type: 'single', options: ['SQL — динамическая гибкая схема, NoSQL — строгая фиксированная', 'SQL — фиксированная строгая схема, NoSQL — гибкая динамическая', 'Они одинаковы', 'SQL не имеет схемы'], correct: 1 },
+    { q: 'Какие СУБД относятся к документо-ориентированным?', type: 'multi', options: ['MongoDB', 'CouchDB', 'MySQL', 'PostgreSQL'], correct: [0, 1] },
+    { q: 'Какие свойства ACID гарантируют реляционные БД?', type: 'multi', options: ['Atomicity', 'Consistency', 'Isolation', 'Durability'], correct: [0, 1, 2, 3] },
+    { q: 'Какой пакет рекомендует лекция для работы с MySQL в Node.js?', type: 'single', options: ['mysql', 'mysql2 (с промисами, prepared statements и пулом соединений)', 'sequelize', 'knex'], correct: 1 },
+    { q: 'Что такое пул соединений (connection pool)?', type: 'single', options: ['Открытие одного соединения на каждый запрос', 'Управление несколькими соединениями, их повторное использование и восстановление при обрывах', 'Кеширование запросов', 'Хранимая процедура'], correct: 1 },
+    { q: 'Как защитить SQL-запрос от SQL-инъекций?', type: 'single', options: ['Экранировать кавычки вручную', 'Использовать плейсхолдеры (?) с параметрами', 'Кодировать запрос в Base64', 'Проверять длину строки'], correct: 1 },
+    { q: 'Что вернёт await connection.insertId (по лекции про result)?', type: 'single', options: ['Количество затронутых строк', 'Последний вставленный ID (insertId)', 'Количество предупреждений', 'Имя таблицы'], correct: 1 },
+    { q: 'Как установить соединение в MongoDB?', type: 'single', options: ['new MongoClient(uri) + client.connect()', 'mongoose.connect() только', 'require("mongodb").open()', 'Нельзя подключиться из Node.js'], correct: 0 },
+    { q: 'Что делает метод findOne() в драйвере MongoDB?', type: 'single', options: ['Возвращает массив документов', 'Возвращает первый найденный документ по фильтру', 'Удаляет документ', 'Обновляет документ'], correct: 1 },
+    { q: 'Как MongoDB хранит данные?', type: 'single', options: ['В таблицах со строгой схемой', 'В документах формата BSON (бинарный JSON)', 'В формате CSV', 'В XML'], correct: 1 }
+  ]
+}
+];
+
+    var ALL_TESTS = TESTS.concat(TESTS2, TESTS3);
+
+    (function () {
+      var EXAM_FILE = 'Обязательная контрольная работа Веб-программирование.docx';
+      var EXAM_SRC  = 'js/control/lec-0.js';
+
+      var sidebar        = document.getElementById('sidebar');
+      var sidebarClose   = document.getElementById('sidebar-close');
+      var sidebarOpenBtn = document.getElementById('sidebar-open-btn');
+      var sidebarOverlay = document.getElementById('sidebar-overlay');
+      var searchInput    = document.getElementById('lec-search');
+      var sidebarList    = document.getElementById('sidebar-list');
+      var examItem       = document.getElementById('exam-item');
+
+      var welcome        = document.getElementById('reader-welcome');
+      var errorEl        = document.getElementById('reader-error');
+      var errorMsg       = document.getElementById('reader-error-msg');
+      var testView       = document.getElementById('test-view');
+      var resultView     = document.getElementById('result-view');
+      var examView       = document.getElementById('exam-view');
+
+      var testTitle      = document.getElementById('test-title');
+      var testMeta       = document.getElementById('test-meta');
+      var testCounter    = document.getElementById('test-counter');
+      var testProgress   = document.getElementById('test-progress');
+      var testBody       = document.getElementById('test-body');
+      var btnFinish      = document.getElementById('btn-finish');
+
+      var resultTitle    = document.getElementById('result-title');
+      var resultMeta     = document.getElementById('result-meta');
+      var resultScore    = document.getElementById('result-score');
+      var resultPercent  = document.getElementById('result-percent');
+      var resultMark     = document.getElementById('result-mark');
+      var resultReview   = document.getElementById('result-review');
+      var btnRetry       = document.getElementById('btn-retry');
+      var btnToList      = document.getElementById('btn-to-list');
+
+      var examContent    = document.getElementById('exam-content');
+      var btnExamDownload = document.getElementById('btn-exam-download');
+
+      var headerEl = document.querySelector('.site-header');
+      function syncHeaderH() {
+        if (!headerEl) return;
+        document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
+      }
+      syncHeaderH();
+      window.addEventListener('resize', syncHeaderH);
+
+      var currentIdx = -1;
+
+      function hideAll() {
+        if (welcome) welcome.setAttribute('hidden', '');
+        testView.hidden = true;
+        resultView.hidden = true;
+        examView.hidden = true;
+        errorEl.classList.remove('is-visible');
+      }
+
+      function showWelcome() {
+        hideAll();
+        if (welcome) welcome.removeAttribute('hidden');
+        sidebarList.querySelectorAll('[data-test]').forEach(function (a) { a.classList.remove('is-active'); });
+      }
+
+      sidebarClose.addEventListener('click', function () {
+        sidebar.classList.add('is-collapsed');
+        sidebarOpenBtn.classList.add('is-visible');
+      });
+      sidebarOpenBtn.addEventListener('click', function () {
+        sidebar.classList.remove('is-collapsed');
+        sidebar.classList.add('is-open');
+        sidebarOpenBtn.classList.remove('is-visible');
+        sidebarOverlay.classList.add('is-visible');
+      });
+      sidebarOverlay.addEventListener('click', closeMobileSidebar);
+      function closeMobileSidebar() {
+        sidebar.classList.remove('is-open');
+        sidebarOverlay.classList.remove('is-visible');
+      }
+
+      searchInput.addEventListener('input', function () {
+        var q = this.value.trim().toLowerCase();
+        var items = sidebarList.querySelectorAll('.lec-item');
+        var groups = sidebarList.querySelectorAll('.lec-group__label');
+        items.forEach(function (li) {
+          var text = li.textContent.toLowerCase();
+          li.style.display = (!q || text.indexOf(q) !== -1) ? '' : 'none';
+        });
+        groups.forEach(function (label) {
+          var ul = label.nextElementSibling;
+          if (!ul) return;
+          var visible = ul.querySelectorAll('.lec-item:not([style*="display: none"])').length;
+          label.style.display = visible ? '' : 'none';
+          ul.style.display = visible ? '' : 'none';
+        });
+      });
+
+      sidebarList.addEventListener('click', function (e) {
+        var exam = e.target.closest('#exam-item');
+        if (exam) { e.preventDefault(); showExam(); closeMobileSidebar(); return; }
+        var link = e.target.closest('[data-test]');
+        if (!link) return;
+        e.preventDefault();
+        var idx = parseInt(link.getAttribute('data-test'), 10);
+        startTest(idx);
+        closeMobileSidebar();
+      });
+
+      function startTest(idx) {
+        if (idx < 0 || idx >= ALL_TESTS.length) return;
+        currentIdx = idx;
+        var t = ALL_TESTS[idx];
+        hideAll();
+        testView.hidden = false;
+        testTitle.textContent = t.title;
+        testMeta.textContent = 'Тест по лекции «' + t.num + '»';
+        renderQuestions(t);
+        updateProgress();
+        window.scrollTo(0, 0);
+        sidebarList.querySelectorAll('[data-test]').forEach(function (a) {
+          a.classList.toggle('is-active', parseInt(a.getAttribute('data-test'), 10) === idx);
+        });
+      }
+
+      function renderQuestions(t) {
+        var html = '';
+        t.questions.forEach(function (q, qi) {
+          var multi = q.type === 'multi';
+          html += '<fieldset class="test-question" data-q="' + qi + '">';
+          html += '<legend class="test-question__text"><span class="test-question__num">' + (qi + 1) + '</span><span>' + escapeHtml(q.q) + '</span></legend>';
+          if (multi) html += '<div class="test-question__hint">Можно выбрать несколько вариантов</div>';
+          html += '<div class="test-opts">';
+          q.options.forEach(function (opt, oi) {
+            var inputType = multi ? 'checkbox' : 'radio';
+            html += '<label class="opt"><input type="' + inputType + '" name="q' + qi + '" value="' + oi + '"><span>' + escapeHtml(opt) + '</span></label>';
+          });
+          html += '</div></fieldset>';
+        });
+        testBody.innerHTML = html;
+        testBody.querySelectorAll('input').forEach(function (input) {
+          input.addEventListener('change', function () {
+            var opt = input.closest('.opt');
+            if (input.type === 'checkbox') {
+              opt.classList.toggle('is-checked', input.checked);
+            } else {
+              var group = input.closest('.test-question').querySelectorAll('.opt');
+              group.forEach(function (o) { o.classList.remove('is-checked'); });
+              opt.classList.add('is-checked');
+            }
+            updateProgress();
+          });
+        });
+      }
+
+      function answeredCount() {
+        var t = ALL_TESTS[currentIdx];
+        var n = 0;
+        t.questions.forEach(function (q, qi) {
+          var checked = testBody.querySelectorAll('input[name="q' + qi + '"]:checked');
+          if (checked.length) n++;
+        });
+        return n;
+      }
+
+      function updateProgress() {
+        var t = ALL_TESTS[currentIdx];
+        var n = answeredCount();
+        testCounter.textContent = 'Отвечено: ' + n + ' / ' + t.questions.length;
+        testProgress.style.width = (n / t.questions.length * 100) + '%';
+      }
+
+      function getSelected(qi) {
+        var checked = testBody.querySelectorAll('input[name="q' + qi + '"]:checked');
+        var arr = [];
+        checked.forEach(function (i) { arr.push(parseInt(i.value, 10)); });
+        return arr;
+      }
+
+      function isCorrect(q, selected) {
+        if (q.type === 'single') {
+          return selected.length === 1 && selected[0] === q.correct;
+        }
+        if (selected.length !== q.correct.length) return false;
+        var a = selected.slice().sort(function (x, y) { return x - y; });
+        var b = q.correct.slice().sort(function (x, y) { return x - y; });
+        for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+        return true;
+      }
+
+      btnFinish.addEventListener('click', function () {
+        var t = ALL_TESTS[currentIdx];
+        var score = 0;
+        var review = [];
+        t.questions.forEach(function (q, qi) {
+          var selected = getSelected(qi);
+          var ok = isCorrect(q, selected);
+          if (ok) score++;
+          review.push({ q: q, selected: selected, ok: ok });
+        });
+        showResult(t, score, review);
+      });
+
+      function showResult(t, score, review) {
+        hideAll();
+        resultView.hidden = false;
+        resultTitle.textContent = t.title;
+        resultMeta.textContent = 'Результат теста';
+        resultScore.textContent = score;
+        var percent = Math.round(score / t.questions.length * 100);
+        resultPercent.textContent = percent + '%';
+        resultMark.textContent = Math.max(1, Math.round(percent / 10));
+        resultReview.innerHTML = review.map(function (r, i) {
+          var your = r.selected.length ? r.selected.map(function (s) { return r.q.options[s]; }).join('; ') : 'не отвечено';
+          var correct = (Array.isArray(r.q.correct) ? r.q.correct : [r.q.correct]).map(function (c) { return r.q.options[c]; }).join('; ');
+          return '<div class="review-item ' + (r.ok ? 'review-item--ok' : 'review-item--bad') + '">' +
+            '<div class="review-item__q">' + (i + 1) + '. ' + escapeHtml(r.q.q) + '</div>' +
+            '<div class="review-item__a"><b>Ваш ответ:</b> ' + escapeHtml(your) + '</div>' +
+            (r.ok ? '' : '<div class="review-item__c"><b>Верный ответ:</b> ' + escapeHtml(correct) + '</div>') +
+          '</div>';
+        }).join('');
+        window.scrollTo(0, 0);
+      }
+
+      btnRetry.addEventListener('click', function () { startTest(currentIdx); });
+      btnToList.addEventListener('click', showWelcome);
+
+      var examLoaded = false;
+      function showExam() {
+        hideAll();
+        examView.hidden = false;
+        window.scrollTo(0, 0);
+        if (examLoaded) return;
+        if (window.LECTURE_FILES && window.LECTURE_FILES[EXAM_FILE]) {
+          renderExam();
+          return;
+        }
+        var s = document.createElement('script');
+        s.src = EXAM_SRC;
+        s.onload = renderExam;
+        s.onerror = function () { showExamError('Не удалось загрузить фрагмент контрольной работы.'); };
+        document.head.appendChild(s);
+      }
+      function renderExam() {
+        var b64 = (window.LECTURE_FILES || {})[EXAM_FILE];
+        if (!b64) { showExamError('Фрагмент контрольной работы не найден.'); return; }
+        mammoth.convertToHtml({ arrayBuffer: b64ToArrayBuffer(b64) })
+          .then(function (result) {
+            examContent.innerHTML = result.value;
+            examLoaded = true;
+          })
+          .catch(function (err) { showExamError('Не удалось отобразить контрольную работу: ' + err.message); });
+      }
+      function showExamError(msg) {
+        hideAll();
+        errorMsg.textContent = msg;
+        errorEl.classList.add('is-visible');
+      }
+
+      btnExamDownload.addEventListener('click', function () {
+        var b64 = (window.LECTURE_FILES || {})[EXAM_FILE];
+        if (!b64) return;
+        var blob = new Blob([b64ToArrayBuffer(b64)], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = EXAM_FILE;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      function b64ToArrayBuffer(b64) {
+        var bin = atob(b64);
+        var len = bin.length;
+        var bytes = new Uint8Array(len);
+        for (var i = 0; i < len; i++) bytes[i] = bin.charCodeAt(i);
+        return bytes.buffer;
+      }
+
+      function escapeHtml(text) {
+        var d = document.createElement('div');
+        d.textContent = text;
+        return d.innerHTML;
+      }
+
+      var hash = window.location.hash;
+      var m = hash.match(/^#test-(\d+)$/);
+      if (m) {
+        var idx = parseInt(m[1], 10);
+        if (idx >= 0 && idx < ALL_TESTS.length) startTest(idx);
+      } else if (hash === '#exam') {
+        showExam();
+      }
+    })();
+  </script>
+</body>
+</html>
