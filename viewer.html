@@ -131,6 +131,30 @@
     }
     .doc-header h2 { margin: 0; font-size: 1.3em; font-family: Calibri, Arial, sans-serif; color: var(--paper-ink); }
     .doc-header .doc-meta { color: var(--paper-sub); font-size: 0.88em; }
+    .doc-download {
+      flex-shrink: 0;
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border: none;
+      border-radius: 9px;
+      background: var(--accent, #0e9f9a);
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .doc-download:hover { background: var(--accent-dark, #0b7f7b); }
+    body.a11y .doc-download { background: #ffe600; color: #000; }
+    body.a11y .doc-download:hover { background: #fff200; }
+
+    @media (max-width: 600px) {
+      .doc-download { margin-left: 0; width: 100%; justify-content: center; }
+    }
 
     /* Загрузка / ошибка */
     .loading-state {
@@ -245,6 +269,7 @@
         <div class="doc-header">
           <h2 id="doc-title">Загрузка…</h2>
           <span class="doc-meta" id="doc-meta"></span>
+          <button class="doc-download" id="btn-download" type="button">Скачать лекцию</button>
         </div>
         <div id="viewer-container" class="viewer-content"></div>
       </div>
@@ -366,6 +391,29 @@
       if (idx === undefined) {
         showError('Лекция не встроена в сборку: ' + fileName);
         return;
+      }
+
+      // --- Кнопка «Скачать лекцию» (.docx) ---
+      var btnDownload = document.getElementById('btn-download');
+      if (btnDownload) {
+        btnDownload.addEventListener('click', function () {
+          ensureLectureLoaded(idx, fileName, function (loadErr) {
+            if (loadErr) { showError('Не удалось скачать лекцию: ' + loadErr.message); return; }
+            var b64 = (window.LECTURE_FILES || {})[fileName];
+            if (!b64) { showError('Фрагмент лекции не найден.'); return; }
+            var blob = new Blob([b64ToArrayBuffer(b64)], {
+              type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          });
+        });
       }
 
       ensureLectureLoaded(idx, fileName, function (loadErr) {
