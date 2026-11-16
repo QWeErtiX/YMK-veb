@@ -17,19 +17,24 @@
   --indigo-soft: #eef0ff;
 
   /* --- нейтральные --- */
-  --ink: #141936;
-  --muted: #59608a;
-  --bg: #ffffff;
-  --page-bg: #ffffff;
-  --card: #ffffff;
-  --card-grad: #ffffff;
-  --line: #dfe5f4;
+  --ink: #1d2340;
+  --muted: #5c6285;
+  --bg: #faf7f1;
+  --page-bg:
+    radial-gradient(1100px 700px at 88% -12%, rgba(99, 102, 241, .14), transparent 60%),
+    radial-gradient(900px 650px at -12% 22%, rgba(20, 184, 166, .16), transparent 55%),
+    radial-gradient(900px 700px at 50% 128%, rgba(244, 114, 182, .10), transparent 62%),
+    radial-gradient(700px 500px at 62% 42%, rgba(245, 158, 11, .08), transparent 60%),
+    linear-gradient(180deg, #fbf8f2 0%, #f6f3ec 100%);
+  --card: #fffdf8;
+  --card-grad: linear-gradient(180deg, #fffdf8 0%, #f9f6ef 100%);
+  --line: #e8e3d6;
 
   /* --- оформление --- */
   --radius: 18px;
   --container: 1080px;
-  --shadow: 0 16px 40px rgba(23, 30, 77, .12);
-  --shadow-soft: 0 8px 22px rgba(23, 30, 77, .08);
+  --shadow: 0 16px 40px rgba(43, 36, 22, .14);
+  --shadow-soft: 0 8px 22px rgba(43, 36, 22, .09);
 
   /* --- градиенты --- */
   --grad-accent: linear-gradient(135deg, var(--accent) 0%, var(--indigo) 100%);
@@ -1311,3 +1316,51 @@ body.theme-dark select {
 body.a11y .control-big__btn { background: #000 !important; border-color: #ffe600 !important; color: #ffe600 !important; }
 body.a11y .control-big__badge { background: #ffe600 !important; color: #000 !important; }
 body.a11y .control-big__sub { color: #ffe600 !important; }
+
+/* ---------------------------------------------------------
+   СВЕТЛАЯ ТЕМА: стеклянная шапка, градиентный подвал,
+   акцентные цвета разделов
+   --------------------------------------------------------- */
+
+/* Полупрозрачное «стекло» в шапке */
+body:not(.theme-dark):not(.a11y) .site-header {
+  background: rgba(253, 251, 246, .78);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  border-bottom: 1px solid rgba(43, 36, 22, .08);
+}
+
+/* Подвал-градиент: бирюза → индиго */
+body:not(.theme-dark):not(.a11y) .site-footer {
+  border-top: none;
+  background: linear-gradient(135deg, #0e9f9a 0%, #4f46e5 100%);
+}
+body:not(.theme-dark):not(.a11y) .footer__text {
+  color: rgba(255, 255, 255, .92);
+}
+body:not(.theme-dark):not(.a11y) .footer__badge {
+  background: rgba(255, 255, 255, .22);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, .35);
+}
+
+/* Акцентные кромки секций на главной */
+body:not(.theme-dark):not(.a11y) .section-btn { border-top-width: 3px; }
+body:not(.theme-dark):not(.a11y) #section-theory .section-btn,
+body:not(.theme-dark):not(.a11y) #section-theory .section-btn:hover { border-top-color: #4f46e5; }
+body:not(.theme-dark):not(.a11y) #section-practice .section-btn,
+body:not(.theme-dark):not(.a11y) #section-practice .section-btn:hover { border-top-color: #0e9f9a; }
+body:not(.theme-dark):not(.a11y) #section-control .section-btn,
+body:not(.theme-dark):not(.a11y) #section-control .section-btn:hover { border-top-color: #d97706; }
+body:not(.theme-dark):not(.a11y) #section-extra .section-btn,
+body:not(.theme-dark):not(.a11y) #section-extra .section-btn:hover { border-top-color: #db2777; }
+
+/* Картинка "бумага" слегка тёплая и глубже тень */
+body:not(.theme-dark):not(.a11y) .page-content,
+body:not(.theme-dark):not(.a11y) .reader-doc,
+body:not(.theme-dark):not(.a11y) .doc-link,
+body:not(.theme-dark):not(.a11y) .viewer-page,
+body:not(.theme-dark):not(.a11y) .section-docs {
+  border-color: rgba(43, 36, 22, .06);
+}
+
