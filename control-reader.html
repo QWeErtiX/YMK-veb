@@ -679,6 +679,54 @@
     .reader-doc.test-view, .reader-doc.result-view, .reader-doc.exam-view { display: block; }
     .reader-doc.test-view[hidden], .reader-doc.result-view[hidden], .reader-doc.exam-view[hidden] { display: none; }
     .reader-welcome[hidden] { display: none; }
+
+    /* ============ ДЕРЕВО В САЙДБАРЕ ============ */
+    .tree-group { margin: 2px 0 10px; }
+    .tree-group__summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 10px;
+      margin: 0 0 2px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    .tree-group__summary::-webkit-details-marker { display: none; }
+    .tree-group__summary::marker { content: ''; }
+    .tree-group__summary::before {
+      content: '';
+      flex-shrink: 0;
+      width: 7px;
+      height: 7px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(-45deg);
+      transition: transform .18s ease;
+    }
+    .tree-group[open] > .tree-group__summary::before { transform: rotate(45deg); }
+    .tree-group__summary:hover { background: var(--accent-soft); color: var(--accent-dark); }
+    .tree-group__count {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 800;
+      background: var(--indigo-soft);
+      color: var(--indigo);
+      border-radius: 6px;
+      padding: 2px 7px;
+    }
+    .tree-group.search-hidden { display: none; }
+    .tree-group__children { padding-left: 4px; }
+    body.a11y .tree-group__summary { color: #ffe600 !important; }
+    body.a11y .tree-group__summary:hover { background: #ffe600 !important; color: #000 !important; }
+    body.a11y .tree-group__summary::before { border-color: #ffe600; }
+    body.a11y .tree-group__count { background: #000; color: #ffe600; border: 1px solid #ffe600; }
   </style>
 </head>
 <body>
@@ -735,13 +783,13 @@
         </div>
         <div class="sidebar__list" id="sidebar-list">
 
-          <span class="lec-group__label">Обязательное</span>
           <ul class="lec-group__list">
             <li class="lec-item"><a href="#" id="exam-item"><span class="lec-item__num">К</span>Контрольная работа</a></li>
           </ul>
 
-          <span class="lec-group__label">PHP (Лекции 1–14)</span>
-          <ul class="lec-group__list">
+          <details class="tree-group" open>
+            <summary class="tree-group__summary">PHP (Лекции 1–14)<span class="tree-group__count">16</span></summary>
+            <ul class="lec-group__list tree-group__children">
             <li class="lec-item"><a href="#" data-test="0"><span class="lec-item__num">1</span>Обзор технологий создания веб</a></li>
             <li class="lec-item"><a href="#" data-test="1"><span class="lec-item__num">2</span>Веб-сервер и HTTP</a></li>
             <li class="lec-item"><a href="#" data-test="2"><span class="lec-item__num">3</span>Установка и настройка веб-сервера</a></li>
@@ -758,10 +806,12 @@
             <li class="lec-item"><a href="#" data-test="13"><span class="lec-item__num">12</span>Классы и объекты</a></li>
             <li class="lec-item"><a href="#" data-test="14"><span class="lec-item__num">13</span>Трейты</a></li>
             <li class="lec-item"><a href="#" data-test="15"><span class="lec-item__num">14</span>Клиентская часть</a></li>
-          </ul>
+            </ul>
+          </details>
 
-          <span class="lec-group__label">Node.js (Лекции 15–25)</span>
-          <ul class="lec-group__list">
+          <details class="tree-group" open>
+            <summary class="tree-group__summary">Node.js (Лекции 15–25)<span class="tree-group__count">14</span></summary>
+            <ul class="lec-group__list tree-group__children">
             <li class="lec-item"><a href="#" data-test="16"><span class="lec-item__num">15</span>Введение в Node.js</a></li>
             <li class="lec-item"><a href="#" data-test="17"><span class="lec-item__num">16.1</span>npm и управление пакетами</a></li>
             <li class="lec-item"><a href="#" data-test="18"><span class="lec-item__num">16.2</span>Общие сведения о NPM</a></li>
@@ -776,8 +826,10 @@
             <li class="lec-item"><a href="#" data-test="27"><span class="lec-item__num">23</span>Модули OS и HTTP</a></li>
             <li class="lec-item"><a href="#" data-test="28"><span class="lec-item__num">24</span>Потоки</a></li>
             <li class="lec-item"><a href="#" data-test="29"><span class="lec-item__num">25</span>Node.js и базы данных</a></li>
-          </ul>
+            </ul>
+          </details>
 
+        </div>
       </aside>
 
       <!-- Оверлей для мобильных -->
@@ -792,7 +844,7 @@
         <div class="reader-welcome" id="reader-welcome">
           <h2>Контроль знаний</h2>
           <p>Выберите тест по нужной лекции в списке слева. По завершении теста вы увидите баллы и отметку по&nbsp;десятибалльной шкале.</p>
-          <p><a class="link-back" href="файлы%20контроля/Обязательная%20контрольная%20работа%20Веб-программирование.docx" download>Скачать обязательную контрольную работу (.docx)</a></p>
+          <p><a class="link-back" href="файлы%20контроля/Обязательная%20контрольная%20работа.docx" download>Скачать обязательную контрольную работу (.docx)</a></p>
         </div>
 
         <div class="reader-error" id="reader-error">
@@ -1329,7 +1381,7 @@ var TESTS3 = [
     var ALL_TESTS = TESTS.concat(TESTS2, TESTS3);
 
     (function () {
-      var EXAM_FILE = 'Обязательная контрольная работа Веб-программирование.docx';
+      var EXAM_FILE = 'Обязательная контрольная работа.docx';
       var EXAM_SRC  = 'js/control/lec-0.js';
 
       var sidebar        = document.getElementById('sidebar');
@@ -1409,17 +1461,15 @@ var TESTS3 = [
       searchInput.addEventListener('input', function () {
         var q = this.value.trim().toLowerCase();
         var items = sidebarList.querySelectorAll('.lec-item');
-        var groups = sidebarList.querySelectorAll('.lec-group__label');
+        var groups = sidebarList.querySelectorAll('.tree-group');
         items.forEach(function (li) {
           var text = li.textContent.toLowerCase();
           li.style.display = (!q || text.indexOf(q) !== -1) ? '' : 'none';
         });
-        groups.forEach(function (label) {
-          var ul = label.nextElementSibling;
-          if (!ul) return;
-          var visible = ul.querySelectorAll('.lec-item:not([style*="display: none"])').length;
-          label.style.display = visible ? '' : 'none';
-          ul.style.display = visible ? '' : 'none';
+        groups.forEach(function (branch) {
+          var visible = branch.querySelectorAll('.lec-item:not([style*="display: none"])').length;
+          branch.classList.toggle('search-hidden', visible === 0);
+          if (q && visible > 0) branch.open = true;
         });
       });
 
