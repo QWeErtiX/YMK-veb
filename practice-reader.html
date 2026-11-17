@@ -633,7 +633,7 @@
           <ul class="lec-group__list">
             <li class="lec-item"><a href="#" data-file="Лабораторная работа 1.docx" data-idx="0"><span class="lec-item__num">1</span>Установка Apache и PHP</a></li>
             <li class="lec-item"><a href="#" data-file="Лабораторная работа 2.docx" data-idx="1"><span class="lec-item__num">2</span>Скрипты на PHP</a></li>
-            <li class="lec-item"><a href="#" data-file="Лабораторная работа 3.docx" data-idx="2"><span class="lec-item__num">3</span>Скрипты на PHP</a></li>
+            <li class="lec-item"><a href="#" data-file="Лабораторная работа 3.docx" data-idx="2"><span class="lec-item__num">3</span>Форма авторизации на PHP</a></li>
             <li class="lec-item"><a href="#" data-file="Лабораторная работа 4.docx" data-idx="3"><span class="lec-item__num">4</span>Чтение и запись файлов</a></li>
             <li class="lec-item"><a href="#" data-file="Лабораторная работа 5.docx" data-idx="4"><span class="lec-item__num">5</span>Сессии в веб-приложении</a></li>
             <li class="lec-item"><a href="#" data-file="Лабораторная работа 6.docx" data-idx="5"><span class="lec-item__num">6</span>Функциональный подход</a></li>
@@ -775,6 +775,7 @@
   </footer>
 
   <script src="js/vendor/mammoth.browser.min.js"></script>
+  <script src="js/docx-postprocess.js"></script>
   <script src="js/main.js"></script>
   <script>
   (function () {
@@ -783,7 +784,7 @@
     var LECTURES = [
       { num: '1', file: 'Лабораторная работа 1.docx', title: 'Лабораторная работа 1. Установка и настройка сервера Apache и интерпретатора PHP' },
       { num: '2', file: 'Лабораторная работа 2.docx', title: 'Лабораторная работа 2. Исследование методов создания простейших скриптов на языке PHP' },
-      { num: '3', file: 'Лабораторная работа 3.docx', title: 'Лабораторная работа 3. Исследование методов создания простейших скриптов на языке PHP' },
+      { num: '3', file: 'Лабораторная работа 3.docx', title: 'Лабораторная работа 3. Исследование методов создания формы авторизации на языке PHP' },
       { num: '4', file: 'Лабораторная работа 4.docx', title: 'Лабораторная работа 4. Исследование методов создания скриптов на PHP для чтения и записи файлов' },
       { num: '5', file: 'Лабораторная работа 5.docx', title: 'Лабораторная работа 5. Веб-приложение на PHP с организацией сессий' },
       { num: '6', file: 'Лабораторная работа 6.docx', title: 'Лабораторная работа 6. Решение задач с использованием функционального подхода' },
@@ -1011,7 +1012,7 @@
             loading.classList.remove('is-visible');
             docTitle.textContent   = lec.title;
             docMeta.textContent    = 'Файл: ' + lec.file;
-            docContent.innerHTML   = result.value;
+            docContent.innerHTML   = window.fixVariantTables(result.value);
             docEl.classList.add('is-visible');
             updateNav(idx);
           })

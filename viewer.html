@@ -291,6 +291,7 @@
   </footer>
 
   <script src="js/vendor/mammoth.browser.min.js"></script>
+  <script src="js/docx-postprocess.js"></script>
   <script src="js/lectures/index.js"></script>
   <script src="js/main.js"></script>
   <script>
@@ -422,7 +423,7 @@
         mammoth.convertToHtml({ arrayBuffer: b64ToArrayBuffer(b64) })
           .then(function (result) {
             if (result.messages.length) console.warn('mammoth:', result.messages);
-            showContent(result.value, lectureTitle, fileName);
+            showContent(window.fixVariantTables(result.value), lectureTitle, fileName);
           })
           .catch(function (err) {
             console.error(err);

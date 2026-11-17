@@ -912,6 +912,7 @@
   </footer>
 
   <script src="js/vendor/mammoth.browser.min.js"></script>
+  <script src="js/docx-postprocess.js"></script>
   <script src="js/main.js"></script>
   <script>
     /* ===== Тесты, составленные по каждой лекции курса ===== */
@@ -1623,7 +1624,7 @@ var TESTS3 = [
         if (!b64) { showExamError('Фрагмент контрольной работы не найден.'); return; }
         mammoth.convertToHtml({ arrayBuffer: b64ToArrayBuffer(b64) })
           .then(function (result) {
-            examContent.innerHTML = result.value;
+            examContent.innerHTML = window.fixVariantTables(result.value);
             examLoaded = true;
           })
           .catch(function (err) { showExamError('Не удалось отобразить контрольную работу: ' + err.message); });
