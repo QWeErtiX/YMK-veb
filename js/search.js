@@ -34,9 +34,12 @@
     return count;
   }
 
-  function docLower(d) {
-    if (!d.xl) d.xl = d.x.toLowerCase();
-    return d.xl;
+  function searchable(d) {
+    if (!d.sl) {
+      var extra = d.s === 'practice' ? ' лр' : (d.s === 'control' ? ' кр' : ' лекция');
+      d.sl = (d.t + ' ' + d.n + extra + ' №' + d.n).toLowerCase();
+    }
+    return d.sl;
   }
 
   function targetOf(d) {
@@ -110,22 +113,16 @@
     toggle.focus();
   }
 
-  function makeSnippet(d, words) {
-    var xl = docLower(d);
-    var idx = xl.indexOf(words[0]);
-    if (idx === -1) idx = 0;
-    var start = Math.max(0, idx - 70);
-    var end = Math.min(d.x.length, idx + 170);
-    var s = (start > 0 ? '…' : '') + d.x.slice(start, end) + (end < d.x.length ? '…' : '');
+  function highlightTitle(d, words) {
     var escapedWords = words.map(function (w) { return escapeRegExp(esc(w)); });
-    return esc(s).replace(new RegExp('(' + escapedWords.join('|') + ')', 'gi'), '<mark>$1</mark>');
+    return esc(d.t).replace(new RegExp('(' + escapedWords.join('|') + ')', 'gi'), '<mark>$1</mark>');
   }
 
   function runSearch() {
     var q = input.value.trim();
     selected = -1;
     currentHits = [];
-    if (q.length < 2) {
+    if (q.length < 1) {
       resultsBox.hidden = true;
       resultsBox.innerHTML = '';
       statusEl.textContent = '';
@@ -140,15 +137,15 @@
       var hits = [];
       for (var i = 0; i < docs.length; i++) {
         var d = docs[i];
-        var xl = docLower(d);
+        var sl = searchable(d);
         var all = true;
         for (var w = 0; w < words.length; w++) {
-          if (xl.indexOf(words[w]) === -1) { all = false; break; }
+          if (sl.indexOf(words[w]) === -1) { all = false; break; }
         }
         if (!all) continue;
-        var count = countOccurrences(xl, phrase) * 10;
+        var count = countOccurrences(sl, phrase) * 10;
         for (var w2 = 0; w2 < words.length; w2++) {
-          count += countOccurrences(xl, words[w2]);
+          count += countOccurrences(sl, words[w2]);
         }
         hits.push({ d: d, score: count });
       }
@@ -171,8 +168,7 @@
       return '<button type="button" class="search-result" role="option" id="search-result-' + i + '" data-href="' + esc(targetOf(d)) + '" aria-selected="false">'
         + '<span class="search-result__badge ' + sectionClass(d.s) + '">' + sectionLabel(d.s) + '</span>'
         + '<span class="search-result__body">'
-        + '<span class="search-result__title">' + esc(d.t) + '</span>'
-        + '<span class="search-result__snippet">' + makeSnippet(d, words) + '</span>'
+        + '<span class="search-result__title">' + highlightTitle(d, words) + '</span>'
         + '</span></button>';
     }).join('');
     resultsBox.hidden = false;
