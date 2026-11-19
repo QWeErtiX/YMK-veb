@@ -1364,3 +1364,135 @@ body:not(.theme-dark):not(.a11y) .section-docs {
   border-color: rgba(43, 36, 22, .06);
 }
 
+/* ---------------------------------------------------------
+   СВЕТЛАЯ ТЕМА: цветастость
+   Более насыщенный фон, цветная полоска под шапкой и
+   тонированные кнопки/списки под фирменный цвет раздела:
+   теория — индиго, практика — бирюза, контроль — янтарь,
+   вспомогательный раздел — розовый.
+   --------------------------------------------------------- */
+
+/* Фон: больше насыщенности и цвета, чем в базовой версии */
+body:not(.theme-dark):not(.a11y) {
+  --page-bg:
+    radial-gradient(1150px 750px at 88% -12%, rgba(99, 102, 241, .30), transparent 60%),
+    radial-gradient(950px 700px at -12% 20%, rgba(20, 184, 166, .32), transparent 55%),
+    radial-gradient(950px 750px at 50% 128%, rgba(244, 114, 182, .24), transparent 62%),
+    radial-gradient(720px 520px at 62% 42%, rgba(245, 158, 11, .20), transparent 58%),
+    radial-gradient(760px 600px at 10% 78%, rgba(219, 39, 119, .20), transparent 60%),
+    radial-gradient(760px 560px at 90% 74%, rgba(14, 159, 154, .22), transparent 62%),
+    linear-gradient(180deg, #fdfaf3 0%, #f4efe4 100%);
+}
+
+/* Цветная полоска под шапкой вместо тонкой серой линии */
+body:not(.theme-dark):not(.a11y) .site-header {
+  border-bottom: 3px solid transparent;
+  border-image: linear-gradient(90deg,
+    #0e9f9a 0%, #2ec9c2 18%,
+    #4f46e5 38%, #8b83ff 55%,
+    #d97706 72%,
+    #db2777 88%, #f472b6 100%) 1;
+}
+
+/* Подвал уже градиентный — добавляем ему мягкое свечение сверху */
+body:not(.theme-dark):not(.a11y) .site-footer {
+  box-shadow: 0 -10px 34px rgba(79, 70, 229, .22), 0 -4px 14px rgba(14, 159, 154, .18);
+}
+
+/* --- Кнопки разделов: цветная подложка и тень под цвет раздела --- */
+
+/* теория — индиго */
+body:not(.theme-dark):not(.a11y) #section-theory .section-btn {
+  background: linear-gradient(155deg, #eeedff 0%, #f7f6ff 52%, #fffdf8 100%);
+  border-color: #d6d2fb;
+  border-top-color: #4f46e5;
+  box-shadow: 0 14px 34px rgba(79, 70, 229, .20);
+}
+body:not(.theme-dark):not(.a11y) #section-theory .section-btn__label { color: #3730a3; }
+body:not(.theme-dark):not(.a11y) #section-theory .section-btn:hover {
+  border-color: #4f46e5;
+  box-shadow: 0 20px 44px rgba(79, 70, 229, .34);
+}
+
+/* практика — бирюза */
+body:not(.theme-dark):not(.a11y) #section-practice .section-btn {
+  background: linear-gradient(155deg, #e8fbfa 0%, #f3fdfc 52%, #fffdf8 100%);
+  border-color: #bfeae6;
+  border-top-color: #0e9f9a;
+  box-shadow: 0 14px 34px rgba(14, 159, 154, .20);
+}
+body:not(.theme-dark):not(.a11y) #section-practice .section-btn__label { color: #0b7f7b; }
+body:not(.theme-dark):not(.a11y) #section-practice .section-btn:hover {
+  border-color: #0e9f9a;
+  box-shadow: 0 20px 44px rgba(14, 159, 154, .34);
+}
+
+/* контроль — янтарь */
+body:not(.theme-dark):not(.a11y) #section-control .section-btn {
+  background: linear-gradient(155deg, #fdf2da 0%, #fffaf0 52%, #fffdf8 100%);
+  border-color: #f0dcae;
+  border-top-color: #d97706;
+  box-shadow: 0 14px 34px rgba(217, 119, 6, .20);
+}
+body:not(.theme-dark):not(.a11y) #section-control .section-btn__label { color: #92400e; }
+body:not(.theme-dark):not(.a11y) #section-control .section-btn:hover {
+  border-color: #d97706;
+  box-shadow: 0 20px 44px rgba(217, 119, 6, .34);
+}
+
+/* вспомогательный раздел — розовый */
+body:not(.theme-dark):not(.a11y) #section-extra .section-btn {
+  background: linear-gradient(155deg, #fdeaf2 0%, #fdf2f7 52%, #fffdf8 100%);
+  border-color: #f2c3d6;
+  border-top-color: #db2777;
+  box-shadow: 0 14px 34px rgba(219, 39, 119, .20);
+}
+body:not(.theme-dark):not(.a11y) #section-extra .section-btn__label { color: #be185d; }
+body:not(.theme-dark):not(.a11y) #section-extra .section-btn:hover {
+  border-color: #db2777;
+  box-shadow: 0 20px 44px rgba(219, 39, 119, .34);
+}
+
+/* Раскрытые панели и заголовки списков — в цвет раздела */
+body:not(.theme-dark):not(.a11y) #docs-theory { border-color: #dcd8ff; box-shadow: 0 14px 36px rgba(79, 70, 229, .18); }
+body:not(.theme-dark):not(.a11y) #docs-theory .section-docs__title { color: #4f46e5; }
+
+body:not(.theme-dark):not(.a11y) #docs-practice { border-color: #c4ece9; box-shadow: 0 14px 36px rgba(14, 159, 154, .18); }
+body:not(.theme-dark):not(.a11y) #docs-practice .section-docs__title { color: #0e9f9a; }
+
+body:not(.theme-dark):not(.a11y) #docs-control { border-color: #efdcb0; box-shadow: 0 14px 36px rgba(217, 119, 6, .18); }
+body:not(.theme-dark):not(.a11y) #docs-control .section-docs__title { color: #b45309; }
+
+body:not(.theme-dark):not(.a11y) #docs-extra { border-color: #f0c3d3; box-shadow: 0 14px 36px rgba(219, 39, 119, .18); }
+body:not(.theme-dark):not(.a11y) #docs-extra .section-docs__title { color: #db2777; }
+
+/* Ссылки на документы: цветная рамка и цветной номер в цвет раздела */
+body:not(.theme-dark):not(.a11y) #docs-theory .doc-link { border-color: #dcd9ff; background: linear-gradient(180deg, #f5f4ff, #eeeeff); }
+body:not(.theme-dark):not(.a11y) #docs-theory .doc-link__num { background: linear-gradient(135deg, #4f46e5, #8b83ff); }
+body:not(.theme-dark):not(.a11y) #docs-theory .doc-link:hover { border-color: #4f46e5; }
+
+body:not(.theme-dark):not(.a11y) #docs-practice .doc-link { border-color: #cdeeeb; background: linear-gradient(180deg, #f3fdfc, #e4faf7); }
+body:not(.theme-dark):not(.a11y) #docs-practice .doc-link__num { background: linear-gradient(135deg, #0e9f9a, #2ec9c2); }
+body:not(.theme-dark):not(.a11y) #docs-practice .doc-link:hover { border-color: #0e9f9a; }
+
+body:not(.theme-dark):not(.a11y) #docs-control .doc-link { border-color: #efe2b8; background: linear-gradient(180deg, #fffdf3, #fbf3da); }
+body:not(.theme-dark):not(.a11y) #docs-control .doc-link__num { background: linear-gradient(135deg, #d97706, #f5b73f); }
+body:not(.theme-dark):not(.a11y) #docs-control .doc-link:hover { border-color: #d97706; }
+
+body:not(.theme-dark):not(.a11y) #docs-extra .doc-link { border-color: #f2cbd9; background: linear-gradient(180deg, #fff6f9, #fce7ee); }
+body:not(.theme-dark):not(.a11y) #docs-extra .doc-link__num { background: linear-gradient(135deg, #db2777, #f472b6); }
+body:not(.theme-dark):not(.a11y) #docs-extra .doc-link:hover { border-color: #db2777; }
+
+/* Кнопки перехода внутри контрольной панели — в общий тон */
+body:not(.theme-dark):not(.a11y) #docs-control .control-big__btn:hover {
+  border-color: #d97706;
+  box-shadow: 0 14px 32px rgba(217, 119, 6, .28);
+}
+
+/* Инструменты в шапке: «глаз» (для слабовидящих) — индиго, переключатель темы — бирюза */
+body:not(.theme-dark):not(.a11y) .tool-btn--a11y {
+  border-color: #4f46e5;
+  background: #eef0ff;
+}
+body:not(.theme-dark):not(.a11y) .tool-btn--a11y:hover { background: #e0e1ff; }
+
