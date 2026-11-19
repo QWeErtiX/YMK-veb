@@ -1,57 +1,51 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import base64
 import json
 import os
 import re
 import sys
-import zipfile
-import xml.etree.ElementTree as ET
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
 
-def docx_text(path):
-    with zipfile.ZipFile(path) as z:
-        xml = z.read('word/document.xml')
-    root = ET.fromstring(xml)
-    lines = []
-    for p in root.iter('{%s}p' % W):
-        line = ''.join(t.text or '' for t in p.iter('{%s}t' % W)).strip()
-        if line:
-            lines.append(line)
-    return re.sub(r'\s+', ' ', ' '.join(lines))
-
-def read_lectures(html_path):
+def read_lectures(html_path, array_name):
     src = open(html_path, encoding='utf-8').read()
-    m = re.search(r'var LECTURES = \[(.*?)\];', src, re.DOTALL)
+    m = re.search(r'var ' + array_name + r' = \[(.*?)\];', src, re.DOTALL)
     if not m:
-        sys.exit('LECTURES не найден в %s' % html_path)
+        sys.exit('%s не найден в %s' % (array_name, html_path))
     items = []
     for mm in re.finditer(r"\{\s*num:\s*'([^']*)',\s*file:\s*'([^']*)',\s*title:\s*'([^']*)'", m.group(1)):
         items.append({'num': mm.group(1), 'file': mm.group(2), 'title': mm.group(3)})
     return items
 
+def read_materials(html_path):
+    src = open(html_path, encoding='utf-8').read()
+    m = re.search(r'var DOCS = \[(.*?)\];', src, re.DOTALL)
+    if not m:
+        sys.exit('DOCS не найден в %s' % html_path)
+    items = []
+    for mm in re.finditer(r"\{\s*num:\s*(\d+),\s*file:\s*'([^']*)',\s*title:\s*'([^']*)'", m.group(1)):
+        items.append({'num': mm.group(1), 'file': mm.group(2), 'title': mm.group(3)})
+    return items
+
 entries = []
-n = 0
-for section, html, folder in [
-    ('theory', 'theory-reader.html', 'файлы лекций'),
-    ('practice', 'practice-reader.html', 'файлы практики'),
+for section, html, array_name in [
+    ('theory', 'theory-reader.html', 'LECTURES'),
+    ('practice', 'practice-reader.html', 'LECTURES'),
 ]:
-    items = read_lectures(os.path.join(ROOT, html))
+    items = read_lectures(os.path.join(ROOT, html), array_name)
     for i, item in enumerate(items):
-        path = os.path.join(ROOT, folder, item['file'])
-        if not os.path.isfile(path):
-            print('ПРОПУЩЕН (нет файла):', item['file'])
-            continue
-        entries.append({'s': section, 'i': i, 'n': item['num'], 't': item['title'], 'x': docx_text(path)})
-        n += 1
+        entries.append({'s': section, 'i': i, 'n': item['num'], 't': item['title']})
     print('%s: %d документов' % (html, len(items)))
 
 exam = os.path.join(ROOT, 'файлы контроля', 'Обязательная контрольная работа.docx')
 if os.path.isfile(exam):
-    entries.append({'s': 'control', 'i': 0, 'n': 'К', 't': 'Контрольная работа', 'x': docx_text(exam)})
+    entries.append({'s': 'control', 'i': 0, 'n': 'К', 't': 'Контрольная работа'})
     print('control: 1 документ')
+
+items = read_materials(os.path.join(ROOT, 'extra-reader.html'))
+for i, item in enumerate(items):
+    entries.append({'s': 'extra', 'i': i, 'n': item['num'], 't': item['title']})
+print('extra: %d документов' % len(items))
 
 out = os.path.join(ROOT, 'js', 'search-index.js')
 payload = 'window.SEARCH_INDEX=' + json.dumps(entries, ensure_ascii=False, separators=(',', ':')) + ';\n'

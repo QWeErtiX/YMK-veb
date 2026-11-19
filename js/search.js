@@ -5,6 +5,7 @@
   var input = document.getElementById('site-search');
   if (!toggle || !overlay || !anchor || !input) return;
   var clearBtn = document.getElementById('search-clear');
+  var closePopoverBtn = document.getElementById('search-close');
   var resultsBox = document.getElementById('search-results');
   var statusEl = document.getElementById('search-status');
   var timer = null;
@@ -36,7 +37,7 @@
 
   function searchable(d) {
     if (!d.sl) {
-      var extra = d.s === 'practice' ? ' лр' : (d.s === 'control' ? ' кр' : ' лекция');
+      var extra = d.s === 'practice' ? ' лр' : (d.s === 'control' ? ' кр' : (d.s === 'extra' ? ' материалы' : ' лекция'));
       d.sl = (d.t + ' ' + d.n + extra + ' №' + d.n).toLowerCase();
     }
     return d.sl;
@@ -45,18 +46,21 @@
   function targetOf(d) {
     if (d.s === 'theory') return 'theory-reader.html#lec-' + d.i;
     if (d.s === 'practice') return 'practice-reader.html#lec-' + d.i;
+    if (d.s === 'extra') return 'extra-reader.html#doc-' + d.i;
     return 'control-reader.html#exam';
   }
 
   function sectionLabel(s) {
     if (s === 'theory') return 'Теория';
     if (s === 'practice') return 'Лабораторные';
+    if (s === 'extra') return 'Материалы';
     return 'Контроль';
   }
 
   function sectionClass(s) {
     if (s === 'theory') return 'badge-theory';
     if (s === 'practice') return 'badge-practice';
+    if (s === 'extra') return 'badge-extra';
     return 'badge-control';
   }
 
@@ -246,5 +250,9 @@
     statusEl.textContent = '';
     clearBtn.hidden = true;
     input.focus();
+  });
+
+  if (closePopoverBtn) closePopoverBtn.addEventListener('click', function () {
+    closeSearch();
   });
 })();
