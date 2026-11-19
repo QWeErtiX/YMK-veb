@@ -1,4 +1,4 @@
-// Мобильное меню (бургер)
+
 (function () {
   var toggle = document.querySelector('.nav-toggle');
   var nav = document.getElementById('main-nav');
@@ -12,7 +12,6 @@
     toggle.setAttribute('aria-label', opened ? 'Закрыть меню' : 'Открыть меню');
   });
 
-  // Закрытие меню после перехода по ссылке
   nav.addEventListener('click', function (event) {
     if (event.target.closest('.nav__link')) {
       headerNav.classList.remove('is-open');
@@ -21,7 +20,6 @@
     }
   });
 
-  // Сброс состояния при возврате на десктопную ширину
   var mq = window.matchMedia('(min-width: 769px)');
   var reset = function () {
     if (mq.matches) {
@@ -32,7 +30,6 @@
   mq.addEventListener ? mq.addEventListener('change', reset) : mq.addListener(reset);
 })();
 
-// Тема оформления (светлая / тёмная)
 (function () {
   var KEY = 'eumk-theme';
   var btn = document.getElementById('theme-toggle');
@@ -51,7 +48,7 @@
       ico.classList.toggle('tool-btn__ico--moon', !dark);
       ico.classList.toggle('tool-btn__ico--sun', dark);
     }
-    // цвет раскрывающегося круга = фон новой темы
+
     return dark ? '#0d1122' : '#d7e0f7';
   }
 
@@ -64,17 +61,14 @@
 
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Плавное перетекание цветов без сплошной заливки экрана
   function animateSwitch(next) {
-    // в режиме для слабовидящих и при «уменьшить движение» — мгновенно
+
     if (reduce || root.classList.contains('a11y')) { apply(next); return; }
 
     busy = true;
 
-    // включаем плавные transition для всех цветов
     root.classList.add('theme-anim');
 
-    // очень мягкая подсветка от кнопки, текст остаётся видимым
     var r = btn.getBoundingClientRect();
     var flash = document.createElement('div');
     flash.className = 'theme-flash';
@@ -82,12 +76,11 @@
     flash.style.setProperty('--theme-y', (r.top + r.height / 2) + 'px');
     document.body.appendChild(flash);
 
-    // переключаем тему — цвета перетекают сами
     apply(next);
 
     if (ico) {
       ico.classList.remove('is-switching');
-      void ico.offsetWidth; // перезапуск анимации иконки
+      void ico.offsetWidth;
       ico.classList.add('is-switching');
     }
 
@@ -108,7 +101,6 @@
   });
 })();
 
-// Версия для слабовидящих
 (function () {
   var KEY = 'eumk-a11y';
   var btn = document.getElementById('a11y-toggle');
@@ -135,7 +127,6 @@
   });
 })();
 
-// Раскрытие списка документов под кнопкой раздела
 (function () {
   var buttons = document.querySelectorAll('.section-btn');
   if (!buttons.length) return;
@@ -143,8 +134,6 @@
   var list = Array.prototype.slice.call(buttons);
   var sectionsWrap = document.querySelector('.sections');
 
-  // расставляет классы для «разъезжающихся» кнопок:
-  // активный раздел остаётся, верхние уезжают влево, нижние — вправо
   function layout() {
     var activeIndex = -1;
     list.forEach(function (btn, i) {
@@ -162,18 +151,16 @@
     });
   }
 
-  // Точная высота содержимого: подставляем в max-height,
-  // чтобы подвал ехал плавно, а не прыгал и не «пролетал» мимо.
   function measure(box) {
     var inner = box.querySelector('.section-docs__inner');
     if (!inner) return 0;
-    // высота содержимого + padding самого блока (если есть) + рамка
+
     var cs = window.getComputedStyle(box);
     var pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
     var border = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
     var innerCs = window.getComputedStyle(inner);
     var innerPad = parseFloat(innerCs.paddingTop) + parseFloat(innerCs.paddingBottom);
-    // высота контента внутри __inner без его padding
+
     var contentH = inner.scrollHeight;
     return Math.ceil(contentH + pad + border + 1);
   }
@@ -183,7 +170,7 @@
     btn.classList.remove('is-open');
     btn.setAttribute('aria-expanded', 'false');
     if (box) {
-      // фиксируем текущую высоту, затем сворачиваем — так переход идёт плавно
+
       box.style.maxHeight = measure(box) + 'px';
       void box.offsetHeight;
       box.classList.remove('is-open');
@@ -196,11 +183,10 @@
     btn.classList.add('is-open');
     btn.setAttribute('aria-expanded', 'true');
     if (box) {
-      // начинаем строго со свёрнутого состояния
-      box.style.maxHeight = '0px';
-      void box.offsetHeight; // фиксируем стартовую точку перехода
 
-      // плавно разворачиваемся до точной высоты содержимого
+      box.style.maxHeight = '0px';
+      void box.offsetHeight;
+
       box.classList.add('is-open');
       box.style.maxHeight = measure(box) + 'px';
     }
@@ -210,7 +196,6 @@
     btn.addEventListener('click', function () {
       var isOpen = btn.classList.contains('is-open');
 
-      // одновременно открыт только один раздел
       list.forEach(function (other) {
         if (other !== btn) close(other);
       });
@@ -225,7 +210,6 @@
     });
   });
 
-  // закрытие по Esc
   document.addEventListener('keydown', function (event) {
     if (event.key !== 'Escape') return;
     var had = false;

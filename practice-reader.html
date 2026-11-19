@@ -7,12 +7,6 @@
   <link rel="icon" type="image/png" href="img/logo-pgktit.png">
   <link rel="stylesheet" href="css/style.css?v=7">
   <style>
-    /* =========================================================
-       THEORY READER — боковая панель + просмотр лекции
-       ========================================================= */
-
-    /* Страница прокручивается целиком; сайдбар — липкий */
-
     body {
       display: flex;
       flex-direction: column;
@@ -23,13 +17,11 @@
       padding: 0;
     }
 
-    /* Обёртка: боковая панель + область просмотра */
     .reader-layout {
       display: flex;
       align-items: flex-start;
     }
 
-    /* ---- БОКОВАЯ ПАНЕЛЬ ---- */
     .sidebar {
       width: 300px;
       flex-shrink: 0;
@@ -109,7 +101,6 @@
       padding: 10px 10px 20px;
     }
 
-    /* Группа лекций */
     .lec-group__label {
       font-size: 11px;
       font-weight: 800;
@@ -169,13 +160,11 @@
       margin-top: 1px;
     }
 
-    /* Схлопнутая боковая панель */
     .sidebar.is-collapsed {
       width: 0;
       border-right-width: 0;
     }
 
-    /* Кнопка открытия панели (когда она закрыта) */
     .sidebar-open-btn {
       position: fixed;
       left: 0;
@@ -204,7 +193,6 @@
     .sidebar-open-btn:hover { width: 38px; }
     .sidebar-open-btn.is-visible { display: flex; }
 
-    /* ---- ОБЛАСТЬ ПРОСМОТРА ---- */
     .reader-main {
       flex: 1 1 auto;
       min-width: 0;
@@ -233,9 +221,6 @@
       margin: 0;
     }
 
-    /* ============================================
-       «БУМАГА» ЛЕКЦИИ — следует теме / режиму a11y
-       ============================================ */
     :root {
       --paper: #ffffff;
       --paper-ink: #000000;
@@ -273,7 +258,6 @@
       --paper-sub: #ffe600;
     }
 
-    /* Блок с лекцией по теме */
     .reader-doc {
       max-width: 860px;
       width: 100%;
@@ -339,7 +323,6 @@
       background: var(--paper);
     }
 
-    /* Типографика */
     .reader-doc__content p       { margin: 0 0 10pt; color: var(--paper-ink); }
     .reader-doc__content h1,
     .reader-doc__content h2,
@@ -379,7 +362,6 @@
     .reader-doc__content a       { color: var(--paper-link); text-decoration: underline; }
     .reader-doc__content hr      { border: none; border-top: 1px solid var(--paper-line); margin: 18pt 0; }
 
-        /* Блок лабораторной №1: установщик и презентация Denwer */
     .lab1-extra {
       display: none;
       padding: 16px 56px;
@@ -405,7 +387,6 @@
     body.a11y .lab1-btn { background: #000; color: #ffe600; border-color: #ffe600; }
     body.a11y .lab1-btn--accent { background: #ffe600; color: #000; }
 
-    /* Текст презентации */
     .ppt-text { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
     .ppt-text[hidden] { display: none; }
     .ppt-slide {
@@ -418,7 +399,6 @@
     body.a11y .ppt-slide { border-color: #ffe600; }
     body.a11y .ppt-slide__num { color: #ffe600; }
 
-    /* Загрузка / ошибка */
     .reader-loading {
       display: none;
       flex-direction: column;
@@ -452,7 +432,6 @@
     }
     .reader-error.is-visible { display: flex; }
 
-    /* Навигация между лекциями */
     .reader-nav {
       display: flex;
       align-items: center;
@@ -496,7 +475,6 @@
       text-align: center;
     }
 
-    /* Мобильный оверлей боковой панели */
     .sidebar-overlay {
       display: none;
       position: fixed;
@@ -506,7 +484,6 @@
     }
     .sidebar-overlay.is-visible { display: block; }
 
-    /* ---- АДАПТИВ ---- */
     @media (max-width: 860px) {
       .sidebar {
         position: fixed;
@@ -557,7 +534,6 @@
       .reader-nav__btn { font-size: 12px; padding: 8px 14px; }
     }
 
-    /* a11y */
     body.a11y .reader-error { color: #ffe600 !important; }
     body.a11y .reader-error button { background: #ffe600 !important; color: #000 !important; }
     body.theme-dark .reader-error { color: #ff8a8a; }
@@ -573,7 +549,7 @@
     body.a11y .sidebar__toggle { background: #000 !important; border-color: #ffe600 !important; color: #ffe600 !important; }
     body.a11y .reader-welcome h2 { color: #ffe600 !important; }
     body.a11y .reader-welcome p { color: #ffe600 !important; }
-  </style>
+</style>
 </head>
 <body>
 
@@ -618,7 +594,6 @@
   <main class="site-main">
     <div class="reader-layout">
 
-      <!-- Боковая панель -->
       <aside class="sidebar" id="sidebar" aria-label="Практический раздел">
         <div class="sidebar__head">
           <span class="sidebar__title">Практический раздел</span>
@@ -664,35 +639,28 @@
         </div>
       </aside>
 
-      <!-- Оверлей для мобильных -->
       <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-      <!-- Кнопка открытия панели -->
       <button class="sidebar-open-btn" id="sidebar-open-btn" title="Открыть список лекций" aria-label="Открыть список лекций">Список</button>
 
-      <!-- Основная область -->
       <div class="reader-main" id="reader-main">
 
-        <!-- Приветствие (пока лекция не выбрана) -->
         <div class="reader-welcome" id="reader-welcome">
           <h2>Выберите лабораторную работу</h2>
           <p>Откройте любую лабораторную в списке слева, чтобы начать работу.</p>
           <p><a class="link-back" href="файлы%20практики/Лабораторный%20практикум%20по%20ВП.docx" download>Скачать полный лабораторный практикум (2,7 МБ)</a></p>
         </div>
 
-        <!-- Спиннер загрузки -->
         <div class="reader-loading" id="reader-loading">
           <div class="reader-spinner"></div>
           <p>Загрузка лекции…</p>
         </div>
 
-        <!-- Ошибка -->
         <div class="reader-error" id="reader-error">
           <p id="reader-error-msg">Не удалось загрузить лекцию.</p>
           <button onclick="readerRetry()" style="padding:10px 24px;background:#0e9f9a;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Повторить</button>
         </div>
 
-        <!-- Документ -->
         <div class="reader-doc" id="reader-doc">
           <div class="reader-doc__head">
             <div>
@@ -701,7 +669,7 @@
             </div>
             <button class="reader-download" id="btn-download" type="button">Скачать лабораторную</button>
           </div>
-          <!-- Лабораторная №1: установщик и презентация Denwer -->
+
           <div class="lab1-extra" id="lab1-extra" hidden>
             <p class="lab1-extra__title">К лабораторной №1 приложено</p>
             <div class="lab1-extra__row">
@@ -780,7 +748,6 @@
   <script>
   (function () {
 
-    // --- Список лекций ---
     var LECTURES = [
       { num: '1', file: 'Лабораторная работа 1.docx', title: 'Лабораторная работа 1. Установка и настройка сервера Apache и интерпретатора PHP' },
       { num: '2', file: 'Лабораторная работа 2.docx', title: 'Лабораторная работа 2. Исследование методов создания простейших скриптов на языке PHP' },
@@ -808,7 +775,6 @@
       { num: '24', file: 'Лабораторная работа 24.docx', title: 'Лабораторная работа 24. REST API для работы с пользователями (MongoDB и Koa.js)' }
     ];
 
-    // --- Встроенные лекции (работают и по file://, и по http) ---
     var fragmentLoading = {};
 
     function ensureLectureLoaded(idx, cb) {
@@ -841,7 +807,6 @@
     var currentIdx   = -1;
     var lastFailFile = null;
 
-    // DOM refs
     var sidebar      = document.getElementById('sidebar');
     var sidebarClose = document.getElementById('sidebar-close');
     var sidebarOpenBtn = document.getElementById('sidebar-open-btn');
@@ -865,7 +830,6 @@
     var pptToggle    = document.getElementById('ppt-toggle');
     var pptText      = document.getElementById('ppt-text');
 
-    // --- Лабораторная №1: показ/скрытие текста презентации ---
     pptToggle.addEventListener('click', function () {
       var opened = !pptText.hidden;
       pptText.hidden = opened;
@@ -873,7 +837,6 @@
       pptToggle.textContent = opened ? 'Показать текст презентации' : 'Скрыть текст презентации';
     });
 
-    // Липкий сайдбар под липкой шапкой: высота шапки в CSS-переменную
     var headerEl = document.querySelector('.site-header');
     function syncHeaderH() {
       if (!headerEl) return;
@@ -882,7 +845,6 @@
     syncHeaderH();
     window.addEventListener('resize', syncHeaderH);
 
-    // --- Sidebar toggle (desktop) ---
     sidebarClose.addEventListener('click', function () {
       sidebar.classList.add('is-collapsed');
       sidebarOpenBtn.classList.add('is-visible');
@@ -902,7 +864,6 @@
       sidebarOverlay.classList.remove('is-visible');
     }
 
-    // --- Поиск ---
     searchInput.addEventListener('input', function () {
       var q = this.value.trim().toLowerCase();
       var items = sidebarList.querySelectorAll('.lec-item');
@@ -911,7 +872,7 @@
         var text = li.textContent.toLowerCase();
         li.style.display = (!q || text.indexOf(q) !== -1) ? '' : 'none';
       });
-      // Скрываем заголовки групп если все их элементы скрыты
+
       groups.forEach(function (label) {
         var ul = label.nextElementSibling;
         if (!ul) return;
@@ -921,7 +882,6 @@
       });
     });
 
-    // --- Клик по лекции ---
     sidebarList.addEventListener('click', function (e) {
       var link = e.target.closest('[data-file]');
       if (!link) return;
@@ -931,7 +891,6 @@
       closeMobileSidebar();
     });
 
-    // --- Кнопки навигации ---
     btnPrev.addEventListener('click', function () {
       if (currentIdx > 0) loadLecture(currentIdx - 1);
     });
@@ -939,7 +898,6 @@
       if (currentIdx < LECTURES.length - 1) loadLecture(currentIdx + 1);
     });
 
-    // --- Скачать лекцию (.docx) ---
     var downloadLabel = btnDownload ? btnDownload.textContent : '';
     btnDownload.addEventListener('click', function () {
       if (currentIdx < 0) return;
@@ -962,14 +920,12 @@
       window.setTimeout(function () { btnDownload.textContent = downloadLabel; }, 1800);
     });
 
-    // --- Загрузка лекции ---
     function loadLecture(idx) {
       if (idx < 0 || idx >= LECTURES.length) return;
       var lec = LECTURES[idx];
       currentIdx = idx;
       lastFailFile = lec.file;
 
-      // Дополнительные файлы доступны только в лабораторной №1
       if (lab1Extra) {
         var isLab1 = idx === 0;
         lab1Extra.classList.toggle('is-visible', isLab1);
@@ -981,22 +937,19 @@
         }
       }
 
-      // Подсветить активную в сайдбаре
       sidebarList.querySelectorAll('[data-file]').forEach(function (a) {
         a.classList.toggle('is-active', parseInt(a.getAttribute('data-idx'), 10) === idx);
       });
-      // Прокрутить к активной
+
       var activeLink = sidebarList.querySelector('.is-active');
       if (activeLink) activeLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 
-      // Показать загрузку
       welcome.style.display = 'none';
       docEl.classList.remove('is-visible');
       errorEl.classList.remove('is-visible');
       loading.classList.add('is-visible');
       window.scrollTo(0, 0);
 
-      // Обновить URL hash без перехода
       history.replaceState(null, '', '#lec-' + idx);
 
       ensureLectureLoaded(idx, function (loadErr) {
@@ -1032,12 +985,10 @@
       else btnNext.removeAttribute('data-disabled');
     }
 
-    // --- Повтор при ошибке ---
     window.readerRetry = function () {
       if (currentIdx >= 0) loadLecture(currentIdx);
     };
 
-    // --- Восстановить из hash ---
     var hash = window.location.hash;
     var m = hash.match(/^#lec-(\d+)$/);
     if (m) {
@@ -1046,6 +997,6 @@
     }
 
   })();
-  </script>
+</script>
 </body>
 </html>

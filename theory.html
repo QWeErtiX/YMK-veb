@@ -7,7 +7,6 @@
   <link rel="icon" type="image/png" href="img/logo-pgktit.png">
   <link rel="stylesheet" href="css/style.css?v=7">
   <style>
-    /* ---- Модальное окно со списком лекций ---- */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -88,7 +87,7 @@
     .modal__body {
       overflow-y: auto;
       padding: 18px 28px 24px;
-      /* белый фон списка лекций */
+
       background: #fff;
     }
     body.theme-dark .modal__body {
@@ -146,7 +145,6 @@
       letter-spacing: .01em;
     }
 
-    /* ---- Кнопки-триггеры для открытия модалок ---- */
     .theory-triggers {
       display: flex;
       flex-wrap: wrap;
@@ -189,7 +187,6 @@
       font-size: 1.3rem;
     }
 
-    /* a11y mode */
     body.a11y .modal {
       background: #000 !important;
       border: 2px solid #ffe600 !important;
@@ -226,7 +223,7 @@
       background: #ffe600 !important;
       color: #000 !important;
     }
-  </style>
+</style>
 </head>
 <body>
 
@@ -302,7 +299,6 @@
     </div>
   </footer>
 
-  <!-- МОДАЛЬНОЕ ОКНО: PHP -->
   <div class="modal-overlay" id="modal-php" role="dialog" aria-modal="true" aria-labelledby="modal-php-title">
     <div class="modal">
       <div class="modal__head">
@@ -332,7 +328,6 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО: Node.js -->
   <div class="modal-overlay" id="modal-node" role="dialog" aria-modal="true" aria-labelledby="modal-node-title">
     <div class="modal">
       <div class="modal__head">
@@ -360,7 +355,6 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО: Все лекции -->
   <div class="modal-overlay" id="modal-all" role="dialog" aria-modal="true" aria-labelledby="modal-all-title">
     <div class="modal">
       <div class="modal__head">
@@ -406,7 +400,6 @@
 
   <script src="js/main.js"></script>
   <script>
-    // Открытие/закрытие модалок
     (function () {
       var triggers = document.querySelectorAll('[data-modal]');
       var overlays = document.querySelectorAll('.modal-overlay');
@@ -416,7 +409,7 @@
         if (!overlay) return;
         overlay.classList.add('is-open');
         document.body.style.overflow = 'hidden';
-        // фокус на кнопку закрытия
+
         var closeBtn = overlay.querySelector('.modal__close');
         if (closeBtn) closeBtn.focus();
       }
@@ -433,20 +426,19 @@
       });
 
       overlays.forEach(function (overlay) {
-        // закрытие по клику на затемнение
+
         overlay.addEventListener('click', function (e) {
           if (e.target === overlay) closeAll();
         });
-        // закрытие по кнопке ✕
+
         var closeBtn = overlay.querySelector('.modal__close');
         if (closeBtn) closeBtn.addEventListener('click', closeAll);
       });
 
-      // закрытие по Esc
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') closeAll();
       });
     })();
-  </script>
+</script>
 </body>
 </html>

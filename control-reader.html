@@ -7,12 +7,6 @@
   <link rel="icon" type="image/png" href="img/logo-pgktit.png">
   <link rel="stylesheet" href="css/style.css?v=7">
   <style>
-    /* =========================================================
-       THEORY READER — боковая панель + просмотр лекции
-       ========================================================= */
-
-    /* Страница прокручивается целиком; сайдбар — липкий */
-
     body {
       display: flex;
       flex-direction: column;
@@ -23,13 +17,11 @@
       padding: 0;
     }
 
-    /* Обёртка: боковая панель + область просмотра */
     .reader-layout {
       display: flex;
       align-items: flex-start;
     }
 
-    /* ---- БОКОВАЯ ПАНЕЛЬ ---- */
     .sidebar {
       width: 300px;
       flex-shrink: 0;
@@ -109,7 +101,6 @@
       padding: 10px 10px 20px;
     }
 
-    /* Группа лекций */
     .lec-group__label {
       font-size: 11px;
       font-weight: 800;
@@ -169,13 +160,11 @@
       margin-top: 1px;
     }
 
-    /* Схлопнутая боковая панель */
     .sidebar.is-collapsed {
       width: 0;
       border-right-width: 0;
     }
 
-    /* Кнопка открытия панели (когда она закрыта) */
     .sidebar-open-btn {
       position: fixed;
       left: 0;
@@ -204,7 +193,6 @@
     .sidebar-open-btn:hover { width: 38px; }
     .sidebar-open-btn.is-visible { display: flex; }
 
-    /* ---- ОБЛАСТЬ ПРОСМОТРА ---- */
     .reader-main {
       flex: 1 1 auto;
       min-width: 0;
@@ -233,9 +221,6 @@
       margin: 0;
     }
 
-    /* ============================================
-       «БУМАГА» ЛЕКЦИИ — следует теме / режиму a11y
-       ============================================ */
     :root {
       --paper: #ffffff;
       --paper-ink: #000000;
@@ -273,7 +258,6 @@
       --paper-sub: #ffe600;
     }
 
-    /* Блок с лекцией по теме */
     .reader-doc {
       max-width: 860px;
       width: 100%;
@@ -339,7 +323,6 @@
       background: var(--paper);
     }
 
-    /* Типографика */
     .reader-doc__content p       { margin: 0 0 10pt; color: var(--paper-ink); }
     .reader-doc__content h1,
     .reader-doc__content h2,
@@ -379,7 +362,6 @@
     .reader-doc__content a       { color: var(--paper-link); text-decoration: underline; }
     .reader-doc__content hr      { border: none; border-top: 1px solid var(--paper-line); margin: 18pt 0; }
 
-        /* Блок лабораторной №1: установщик и презентация Denwer */
     .lab1-extra {
       display: none;
       padding: 16px 56px;
@@ -405,7 +387,6 @@
     body.a11y .lab1-btn { background: #000; color: #ffe600; border-color: #ffe600; }
     body.a11y .lab1-btn--accent { background: #ffe600; color: #000; }
 
-    /* Текст презентации */
     .ppt-text { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
     .ppt-text[hidden] { display: none; }
     .ppt-slide {
@@ -418,7 +399,6 @@
     body.a11y .ppt-slide { border-color: #ffe600; }
     body.a11y .ppt-slide__num { color: #ffe600; }
 
-    /* Загрузка / ошибка */
     .reader-loading {
       display: none;
       flex-direction: column;
@@ -452,7 +432,6 @@
     }
     .reader-error.is-visible { display: flex; }
 
-    /* Навигация между лекциями */
     .reader-nav {
       display: flex;
       align-items: center;
@@ -496,7 +475,6 @@
       text-align: center;
     }
 
-    /* Мобильный оверлей боковой панели */
     .sidebar-overlay {
       display: none;
       position: fixed;
@@ -506,7 +484,6 @@
     }
     .sidebar-overlay.is-visible { display: block; }
 
-    /* ---- АДАПТИВ ---- */
     @media (max-width: 860px) {
       .sidebar {
         position: fixed;
@@ -557,7 +534,6 @@
       .reader-nav__btn { font-size: 12px; padding: 8px 14px; }
     }
 
-    /* a11y */
     body.a11y .reader-error { color: #ffe600 !important; }
     body.a11y .reader-error button { background: #ffe600 !important; color: #000 !important; }
     body.theme-dark .reader-error { color: #ff8a8a; }
@@ -574,9 +550,6 @@
     body.a11y .reader-welcome h2 { color: #ffe600 !important; }
     body.a11y .reader-welcome p { color: #ffe600 !important; }
 
-    /* ============================================
-       ТЕСТ — стили поверх «бумаги»
-       ============================================ */
     .test-counter {
       flex-shrink: 0;
       font-size: 13px;
@@ -638,7 +611,6 @@
     .test-finish-btn:hover { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
     body.a11y .test-finish-btn { background: #ffe600; color: #000; border-color: #ffe600; }
 
-    /* РЕЗУЛЬТАТ */
     .result-body { padding: 28px 56px 48px; background: var(--paper); }
     .result-score {
       display: flex; align-items: baseline; gap: 14px;
@@ -675,12 +647,10 @@
       .result-score { font-size: 46px; }
     }
 
-    /* Управление видимостью режимов просмотра */
     .reader-doc.test-view, .reader-doc.result-view, .reader-doc.exam-view { display: block; }
     .reader-doc.test-view[hidden], .reader-doc.result-view[hidden], .reader-doc.exam-view[hidden] { display: none; }
     .reader-welcome[hidden] { display: none; }
 
-    /* ============ ДЕРЕВО В САЙДБАРЕ ============ */
     .tree-group { margin: 2px 0 10px; }
     .tree-group__summary {
       list-style: none;
@@ -727,7 +697,7 @@
     body.a11y .tree-group__summary:hover { background: #ffe600 !important; color: #000 !important; }
     body.a11y .tree-group__summary::before { border-color: #ffe600; }
     body.a11y .tree-group__count { background: #000; color: #ffe600; border: 1px solid #ffe600; }
-  </style>
+</style>
 </head>
 <body>
 
@@ -772,7 +742,6 @@
   <main class="site-main">
     <div class="reader-layout">
 
-      <!-- Боковая панель -->
       <aside class="sidebar" id="sidebar" aria-label="Раздел контроля">
         <div class="sidebar__head">
           <span class="sidebar__title">Раздел контроля</span>
@@ -832,13 +801,10 @@
         </div>
       </aside>
 
-      <!-- Оверлей для мобильных -->
       <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-      <!-- Кнопка открытия панели -->
       <button class="sidebar-open-btn" id="sidebar-open-btn" title="Открыть список лекций" aria-label="Открыть список лекций">Список</button>
 
-      <!-- Основная область -->
       <div class="reader-main" id="reader-main">
 
         <div class="reader-welcome" id="reader-welcome">
@@ -851,7 +817,6 @@
           <p id="reader-error-msg">Не удалось загрузить материал.</p>
         </div>
 
-        <!-- ТЕСТ -->
         <div class="reader-doc test-view" id="test-view" hidden>
           <div class="reader-doc__head">
             <div>
@@ -868,7 +833,6 @@
           </div>
         </div>
 
-        <!-- РЕЗУЛЬТАТ -->
         <div class="reader-doc result-view" id="result-view" hidden>
           <div class="reader-doc__head">
             <div>
@@ -887,7 +851,6 @@
           </div>
         </div>
 
-        <!-- КОНТРОЛЬНАЯ РАБОТА -->
         <div class="reader-doc exam-view" id="exam-view" hidden>
           <div class="reader-doc__head">
             <div>
@@ -915,9 +878,6 @@
   <script src="js/docx-postprocess.js"></script>
   <script src="js/main.js"></script>
   <script>
-    /* ===== Тесты, составленные по каждой лекции курса ===== */
-// Тесты по лекциям 1–7 (ЭУМК «Веб-программирование на стороне сервера»)
-// type: 'single' — один верный ответ (correct: индекс), 'multi' — несколько (correct: массив индексов)
 var TESTS = [
 {
   num: '1', group: 'PHP', title: 'Лекция 1. Обзор технологий создания веб-приложений',
@@ -1026,7 +986,6 @@ var TESTS = [
 }
 ];
 
-// Тесты по лекциям 8–15 (PHP)
 var TESTS2 = [
 {
   num: '6.1', group: 'PHP', title: 'Лекция 6.1. Стандартные функции PHP',
@@ -1165,7 +1124,6 @@ var TESTS2 = [
 }
 ];
 
-// Тесты по лекциям 15–25 (Node.js, CLI, OS, Streams, БД)
 var TESTS3 = [
 {
   num: '15', group: 'Node.js', title: 'Лекция 15. Введение в Node.js',
@@ -1672,6 +1630,6 @@ var TESTS3 = [
         showExam();
       }
     })();
-  </script>
+</script>
 </body>
 </html>

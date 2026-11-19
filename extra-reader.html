@@ -7,12 +7,6 @@
   <link rel="icon" type="image/png" href="img/logo-pgktit.png">
   <link rel="stylesheet" href="css/style.css?v=7">
   <style>
-    /* =========================================================
-       THEORY READER — боковая панель + просмотр лекции
-       ========================================================= */
-
-    /* Страница прокручивается целиком; сайдбар — липкий */
-
     body {
       display: flex;
       flex-direction: column;
@@ -23,13 +17,11 @@
       padding: 0;
     }
 
-    /* Обёртка: боковая панель + область просмотра */
     .reader-layout {
       display: flex;
       align-items: flex-start;
     }
 
-    /* ---- БОКОВАЯ ПАНЕЛЬ ---- */
     .sidebar {
       width: 300px;
       flex-shrink: 0;
@@ -109,7 +101,6 @@
       padding: 10px 10px 20px;
     }
 
-    /* Группа лекций */
     .lec-group__label {
       font-size: 11px;
       font-weight: 800;
@@ -169,13 +160,11 @@
       margin-top: 1px;
     }
 
-    /* Схлопнутая боковая панель */
     .sidebar.is-collapsed {
       width: 0;
       border-right-width: 0;
     }
 
-    /* Кнопка открытия панели (когда она закрыта) */
     .sidebar-open-btn {
       position: fixed;
       left: 0;
@@ -204,7 +193,6 @@
     .sidebar-open-btn:hover { width: 38px; }
     .sidebar-open-btn.is-visible { display: flex; }
 
-    /* ---- ОБЛАСТЬ ПРОСМОТРА ---- */
     .reader-main {
       flex: 1 1 auto;
       min-width: 0;
@@ -233,9 +221,6 @@
       margin: 0;
     }
 
-    /* ============================================
-       «БУМАГА» ЛЕКЦИИ — следует теме / режиму a11y
-       ============================================ */
     :root {
       --paper: #ffffff;
       --paper-ink: #000000;
@@ -273,7 +258,6 @@
       --paper-sub: #ffe600;
     }
 
-    /* Блок с лекцией по теме */
     .reader-doc {
       max-width: 860px;
       width: 100%;
@@ -339,7 +323,6 @@
       background: var(--paper);
     }
 
-    /* Типографика */
     .reader-doc__content p       { margin: 0 0 10pt; color: var(--paper-ink); }
     .reader-doc__content h1,
     .reader-doc__content h2,
@@ -379,7 +362,6 @@
     .reader-doc__content a       { color: var(--paper-link); text-decoration: underline; }
     .reader-doc__content hr      { border: none; border-top: 1px solid var(--paper-line); margin: 18pt 0; }
 
-        /* Загрузка / ошибка */
     .reader-loading {
       display: none;
       flex-direction: column;
@@ -413,7 +395,6 @@
     }
     .reader-error.is-visible { display: flex; }
 
-    /* Навигация между лекциями */
     .reader-nav {
       display: flex;
       align-items: center;
@@ -457,7 +438,6 @@
       text-align: center;
     }
 
-    /* Мобильный оверлей боковой панели */
     .sidebar-overlay {
       display: none;
       position: fixed;
@@ -467,7 +447,6 @@
     }
     .sidebar-overlay.is-visible { display: block; }
 
-    /* ---- АДАПТИВ ---- */
     @media (max-width: 860px) {
       .sidebar {
         position: fixed;
@@ -517,7 +496,6 @@
       .reader-nav__btn { font-size: 12px; padding: 8px 14px; }
     }
 
-    /* a11y */
     body.a11y .reader-error { color: #ffe600 !important; }
     body.a11y .reader-error button { background: #ffe600 !important; color: #000 !important; }
     body.theme-dark .reader-error { color: #ff8a8a; }
@@ -534,7 +512,6 @@
     body.a11y .reader-welcome h2 { color: #ffe600 !important; }
     body.a11y .reader-welcome p { color: #ffe600 !important; }
 
-    /* Просмотр PDF */
     .doc-actions { display: flex; gap: 10px; flex-wrap: wrap; }
     .pdf-frame {
       display: block;
@@ -550,12 +527,10 @@
       .doc-actions { width: 100%; }
     }
 
-    /* Управление видимостью режимов */
     .reader-doc.doc-view { display: block; }
     .reader-doc.doc-view[hidden] { display: none; }
     .reader-welcome[hidden] { display: none; }
 
-    /* Кнопки документов */
     .doc-btn {
       display: inline-flex; align-items: center; gap: 8px;
       padding: 9px 16px; border-radius: 9px; border: 1.5px solid var(--paper-line);
@@ -568,7 +543,7 @@
     .doc-btn--accent:hover { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
     body.a11y .doc-btn { background: #000; color: #ffe600; border-color: #ffe600; }
     body.a11y .doc-btn--accent { background: #ffe600; color: #000; }
-  </style>
+</style>
 </head>
 <body>
 
@@ -613,7 +588,6 @@
   <main class="site-main">
     <div class="reader-layout">
 
-      <!-- Боковая панель -->
       <aside class="sidebar" id="sidebar" aria-label="Вспомогательный раздел">
         <div class="sidebar__head">
           <span class="sidebar__title">Вспомогательный раздел</span>
@@ -636,13 +610,10 @@
 
       </aside>
 
-      <!-- Оверлей для мобильных -->
       <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-      <!-- Кнопка открытия панели -->
       <button class="sidebar-open-btn" id="sidebar-open-btn" title="Открыть список лекций" aria-label="Открыть список лекций">Список</button>
 
-      <!-- Основная область -->
       <div class="reader-main" id="reader-main">
 
         <div class="reader-welcome" id="reader-welcome">
@@ -809,6 +780,6 @@
         if (idx >= 0 && idx < DOCS.length) startDoc(idx);
       }
     })();
-  </script>
+</script>
 </body>
 </html>

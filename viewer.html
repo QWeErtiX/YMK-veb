@@ -7,12 +7,6 @@
   <link rel="icon" type="image/png" href="img/logo-pgktit.png">
   <link rel="stylesheet" href="css/style.css?v=7">
   <style>
-
-    /* =========================================================
-       VIEWER — стили поверх style.css.
-       «Бумага» следует теме и режиму для слабовидящих.
-       ========================================================= */
-
     :root {
       --paper: #ffffff;
       --paper-ink: #000000;
@@ -53,7 +47,6 @@
       --paper-error: #ffe600;
     }
 
-    /* Страница-обёртка лекции — «бумага» по теме */
     .viewer-page {
       max-width: 900px;
       margin: 32px auto 48px;
@@ -66,7 +59,6 @@
     body.theme-dark .viewer-page { box-shadow: 0 4px 40px rgba(0,0,0,.55); }
     body.a11y .viewer-page { border: 3px solid #ffe600; }
 
-    /* Содержимое лекции — word-like */
     .viewer-content {
       padding: 72px 72px 96px;
       font-family: "Times New Roman", Georgia, serif;
@@ -76,7 +68,6 @@
       background: var(--paper);
     }
 
-    /* Типографика внутри лекции */
     .viewer-content p       { margin: 0 0 10pt; }
     .viewer-content h1,
     .viewer-content h2,
@@ -118,7 +109,6 @@
     .viewer-content a       { color: var(--paper-link); text-decoration: underline; }
     .viewer-content hr      { border: none; border-top: 1px solid var(--paper-line); margin: 18pt 0; }
 
-    /* Шапка документа (заголовок + мета) */
     .doc-header {
       display: flex;
       align-items: center;
@@ -156,7 +146,6 @@
       .doc-download { margin-left: 0; width: 100%; justify-content: center; }
     }
 
-    /* Загрузка / ошибка */
     .loading-state {
       display: flex; flex-direction: column; align-items: center;
       justify-content: center; min-height: 400px; gap: 16px;
@@ -182,7 +171,6 @@
     .error-state .btn-retry:hover { background: #0b7f7b; }
     body.a11y .error-state .btn-retry { background: #ffe600; color: #000; }
 
-    /* Ссылка «назад» */
     .link-back {
       display: inline-block; color: #0e9f9a;
       font-weight: 700; text-decoration: none;
@@ -190,7 +178,6 @@
     .link-back:hover { text-decoration: underline; }
     body.a11y .link-back { color: #ffe600 !important; }
 
-    /* Адаптив */
     @media (max-width: 900px) {
       .viewer-content { padding: 48px 36px 64px; }
       .doc-header { padding: 16px 36px; }
@@ -214,8 +201,7 @@
       .viewer-content { padding: 2.54cm; }
       .doc-header, .site-header, .site-footer { display: none !important; }
     }
-  
-  </style>
+</style>
 </head>
 <body>
 
@@ -363,7 +349,6 @@
         viewerPage.style.display   = 'block';
       }
 
-      // --- Встроенные лекции (работают и по file://, и по http) ---
       function b64ToArrayBuffer(b64) {
         var bin = atob(b64);
         var len = bin.length;
@@ -394,7 +379,6 @@
         return;
       }
 
-      // --- Кнопка «Скачать лекцию» (.docx) ---
       var btnDownload = document.getElementById('btn-download');
       if (btnDownload) {
         btnDownload.addEventListener('click', function () {
@@ -431,6 +415,6 @@
           });
       });
     })();
-  </script>
+</script>
 </body>
 </html>
