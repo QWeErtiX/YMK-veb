@@ -47,6 +47,11 @@ for i, item in enumerate(items):
     entries.append({'s': 'extra', 'i': i, 'n': item['num'], 't': item['title']})
 print('extra: %d документов' % len(items))
 
+items = read_materials(os.path.join(ROOT, 'note-reader.html'))
+for i, item in enumerate(items):
+    entries.append({'s': 'note', 'i': i, 'n': item['num'], 't': item['title']})
+print('note: %d документа' % len(items))
+
 out = os.path.join(ROOT, 'js', 'search-index.js')
 payload = 'window.SEARCH_INDEX=' + json.dumps(entries, ensure_ascii=False, separators=(',', ':')) + ';\n'
 with open(out, 'w', encoding='utf-8', newline='\n') as f:

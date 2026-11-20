@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Пояснительная записка — ЭУМК «Веб-программирование на стороне сервера»</title>
+  <link rel="icon" type="image/png" href="img/logo-pgktit.png">
+  <link rel="stylesheet" href="css/style.css?v=14">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .site-main {
+      padding: 0;
+    }
+
+    .reader-layout {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .sidebar {
+      width: 300px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--card);
+      border-right: 2px solid var(--line);
+      overflow: hidden;
+      transition: width .3s ease, transform .3s ease;
+      position: sticky;
+      top: var(--header-h, 72px);
+      max-height: calc(100vh - var(--header-h, 72px));
+    }
+
+    .sidebar__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px 14px;
+      border-bottom: 2px solid var(--line);
+      flex-shrink: 0;
+    }
+
+    .sidebar__title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--ink);
+      margin: 0;
+      letter-spacing: .01em;
+    }
+
+    .sidebar__toggle {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1.5px solid var(--line);
+      background: transparent;
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: background .2s, color .2s;
+    }
+    .sidebar__toggle:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .sidebar__search {
+      padding: 12px 14px 10px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar__search input {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1.5px solid var(--line);
+      background: var(--bg);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      transition: border-color .2s;
+      box-sizing: border-box;
+    }
+    .sidebar__search input:focus {
+      border-color: var(--accent);
+    }
+
+    .sidebar__list {
+      overflow-y: auto;
+      flex: 1 1 auto;
+      padding: 10px 10px 20px;
+    }
+
+    .lec-group__label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 10px 8px 4px;
+      display: block;
+    }
+
+    .lec-group__list {
+      list-style: none;
+      margin: 0 0 8px;
+      padding: 0;
+    }
+
+    .lec-item a {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.35;
+      transition: background .18s, color .18s;
+      cursor: pointer;
+    }
+    .lec-item a:hover {
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+    }
+    .lec-item a.is-active {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--indigo) 100%);
+      color: #fff;
+      font-weight: 700;
+    }
+    .lec-item a.is-active .lec-item__num {
+      background: rgba(255,255,255,.25);
+      color: #fff;
+    }
+
+    .lec-item__num {
+      flex-shrink: 0;
+      min-width: 30px;
+      height: 22px;
+      border-radius: 6px;
+      background: var(--indigo-soft);
+      color: var(--indigo);
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    .sidebar.is-collapsed {
+      width: 0;
+      border-right-width: 0;
+    }
+
+    .sidebar-open-btn {
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 50;
+      width: 34px;
+      height: 110px;
+      background: linear-gradient(135deg, var(--accent), var(--indigo));
+      border: none;
+      border-radius: 0 10px 10px 0;
+      color: #fff;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: inherit;
+      letter-spacing: .12em;
+      writing-mode: vertical-rl;
+      padding: 14px 0;
+      box-shadow: 2px 0 12px rgba(0,0,0,.18);
+      transition: width .2s;
+    }
+    .sidebar-open-btn:hover { width: 38px; }
+    .sidebar-open-btn.is-visible { display: flex; }
+
+    .reader-main {
+      flex: 1 1 auto;
+      min-width: 0;
+      background: var(--page-bg);
+    }
+
+    .reader-welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 60vh;
+      padding: 60px 40px;
+      color: var(--muted);
+      gap: 20px;
+    }
+    .reader-welcome h2 {
+      font-size: 1.5rem;
+      color: var(--ink);
+      margin: 0;
+    }
+    .reader-welcome p {
+      font-size: 1rem;
+      max-width: 420px;
+      margin: 0;
+    }
+
+    :root {
+      --paper: #ffffff;
+      --paper-ink: #000000;
+      --paper-soft: #f0f0f0;
+      --paper-pre: #f5f5f5;
+      --paper-line: #cccccc;
+      --paper-border: #dddddd;
+      --paper-link: #0066cc;
+      --paper-quote-bg: #f0f4fa;
+      --paper-quote-border: #0e9f9a;
+      --paper-sub: #888888;
+    }
+    body.theme-dark {
+      --paper: #1b2342;
+      --paper-ink: #e9ecf8;
+      --paper-soft: #232c56;
+      --paper-pre: #131a35;
+      --paper-line: #2c3560;
+      --paper-border: #2c3560;
+      --paper-link: #8fd3ff;
+      --paper-quote-bg: #16224a;
+      --paper-quote-border: #2ec9c2;
+      --paper-sub: #a3aac8;
+    }
+    body.a11y {
+      --paper: #000000;
+      --paper-ink: #ffe600;
+      --paper-soft: #000000;
+      --paper-pre: #000000;
+      --paper-line: #ffe600;
+      --paper-border: #ffe600;
+      --paper-link: #ffe600;
+      --paper-quote-bg: #000000;
+      --paper-quote-border: #ffe600;
+      --paper-sub: #ffe600;
+    }
+
+    .reader-doc {
+      max-width: 860px;
+      width: 100%;
+      margin: 28px auto 48px;
+      background: var(--paper);
+      color: var(--paper-ink);
+      border-radius: 8px;
+      box-shadow: 0 4px 32px rgba(0,0,0,.13);
+      overflow: hidden;
+      display: none;
+      flex-shrink: 0;
+    }
+    body.theme-dark .reader-doc { box-shadow: 0 4px 40px rgba(0,0,0,.55); }
+    body.a11y .reader-doc { border: 3px solid #ffe600; }
+    .reader-doc.is-visible { display: block; }
+
+    .reader-doc__head {
+      padding: 20px 56px 16px;
+      border-bottom: 2px solid var(--paper-border);
+      background: var(--paper);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .reader-download {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .02em;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+    }
+    .reader-download:hover { background: var(--accent-dark); transform: translateY(-1px); }
+    .reader-download:active { transform: translateY(0); }
+    body.a11y .reader-download { background: #ffe600; color: #000; }
+    body.a11y .reader-download:hover { background: #fff200; }
+    .reader-doc__title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--paper-ink);
+      margin: 0 0 4px;
+      font-family: Calibri, Arial, sans-serif;
+    }
+    .reader-doc__meta { font-size: 12px; color: var(--paper-sub); }
+
+    .reader-doc__content {
+      padding: 48px 56px 72px;
+      font-family: "Times New Roman", Georgia, serif;
+      font-size: 12pt;
+      line-height: 1.5;
+      color: var(--paper-ink);
+      background: var(--paper);
+    }
+
+    .reader-doc__content p       { margin: 0 0 10pt; color: var(--paper-ink); }
+    .reader-doc__content h1,
+    .reader-doc__content h2,
+    .reader-doc__content h3,
+    .reader-doc__content h4,
+    .reader-doc__content h5,
+    .reader-doc__content h6      { color: var(--paper-ink); font-weight: 700; }
+    .reader-doc__content h1      { font-size: 24pt; margin: 20pt 0 10pt; }
+    .reader-doc__content h2      { font-size: 20pt; margin: 20pt 0 10pt; }
+    .reader-doc__content h3      { font-size: 16pt; margin: 16pt 0 8pt;  }
+    .reader-doc__content h4      { font-size: 13pt; margin: 14pt 0 7pt;  }
+    .reader-doc__content h5      { font-size: 12pt; margin: 12pt 0 6pt;  }
+    .reader-doc__content h6      { font-size: 11pt; margin: 10pt 0 5pt;  }
+    .reader-doc__content ul,
+    .reader-doc__content ol      { margin: 6pt 0 6pt 1.25cm; padding: 0; }
+    .reader-doc__content li      { margin: 3pt 0; color: var(--paper-ink); }
+    .reader-doc__content table   { border-collapse: collapse; width: 100%; margin: 12pt 0; font-size: 10pt; }
+    .reader-doc__content th,
+    .reader-doc__content td      { border: 1px solid var(--paper-line); padding: 4pt 6pt; vertical-align: top; color: var(--paper-ink); }
+    .reader-doc__content th      { background: var(--paper-soft); font-weight: 700; }
+    .reader-doc__content pre     {
+      background: var(--paper-pre); color: var(--paper-ink); border: 1px solid var(--paper-border);
+      padding: 12pt; border-radius: 4px; overflow-x: auto;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 9.5pt; line-height: 1.4;
+      white-space: pre-wrap; word-wrap: break-word;
+    }
+    .reader-doc__content code    { font-family: Consolas, "Courier New", monospace; font-size: 10pt; background: var(--paper-soft); padding: 1px 4px; border-radius: 3px; color: var(--paper-ink); }
+    .reader-doc__content pre code { background: transparent; padding: 0; color: inherit; }
+    .reader-doc__content blockquote {
+      margin: 12pt 1.25cm; padding: 6pt 12pt 6pt 18pt;
+      border-left: 4px solid var(--paper-quote-border); background: var(--paper-quote-bg);
+      font-style: italic; line-height: 1.5; color: var(--paper-ink);
+    }
+    .reader-doc__content blockquote p { margin: 0; }
+    .reader-doc__content img     { max-width: 100%; height: auto; display: block; margin: 12pt auto; border: 1px solid var(--paper-border); }
+    .reader-doc__content a       { color: var(--paper-link); text-decoration: underline; }
+    .reader-doc__content hr      { border: none; border-top: 1px solid var(--paper-line); margin: 18pt 0; }
+
+    .reader-loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      gap: 16px;
+      color: var(--muted);
+      padding: 48px;
+    }
+    .reader-loading.is-visible { display: flex; }
+    .reader-spinner {
+      width: 44px; height: 44px;
+      border: 4px solid var(--line);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .reader-error {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      gap: 12px;
+      color: #c00;
+      text-align: center;
+      padding: 48px;
+    }
+    .reader-error.is-visible { display: flex; }
+
+    .reader-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 56px 20px;
+      gap: 12px;
+      background: var(--paper);
+      border-top: 1px solid var(--paper-border);
+    }
+    .reader-nav__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1.5px solid var(--paper-line);
+      background: var(--paper-soft);
+      color: var(--paper-ink);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s, border-color .2s, color .2s;
+      text-decoration: none;
+    }
+    .reader-nav__btn:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent-dark);
+    }
+    body.a11y .reader-nav__btn { background: #000; color: #ffe600; border-color: #ffe600; }
+    body.a11y .reader-nav__btn:hover { background: #ffe600; color: #000; }
+    .reader-nav__btn:disabled,
+    .reader-nav__btn[data-disabled] {
+      opacity: .35;
+      pointer-events: none;
+    }
+    .reader-nav__info {
+      font-size: 12px;
+      color: var(--paper-sub);
+      text-align: center;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      background: rgba(0,0,0,.45);
+    }
+    .sidebar-overlay.is-visible { display: block; }
+
+    @media (max-width: 860px) {
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 45;
+        width: 280px;
+        transform: translateX(-100%);
+        transition: transform .3s ease;
+        box-shadow: 4px 0 24px rgba(0,0,0,.2);
+      }
+      .sidebar.is-open {
+        transform: translateX(0);
+      }
+      .sidebar.is-collapsed {
+        width: 280px;
+        border-right-width: 2px;
+        transform: translateX(-100%);
+      }
+      .sidebar-open-btn {
+        display: flex !important;
+        top: auto;
+        bottom: 18px;
+        left: auto;
+        right: 14px;
+        transform: none;
+        writing-mode: horizontal-tb;
+        width: auto;
+        height: auto;
+        padding: 12px 20px;
+        border-radius: 26px;
+        letter-spacing: .02em;
+      }
+      .reader-layout { display: block; }
+      .reader-main { height: auto; overflow: visible; }
+      .sidebar { max-height: none; height: 100vh; }
+      .reader-doc__content { padding: 28px 24px 48px; }
+      .reader-doc__head { padding: 14px 24px; }
+      .reader-nav { padding: 12px 24px 16px; }
+    }
+
+    @media (max-width: 540px) {
+      .reader-doc__content { padding: 20px 14px 40px; font-size: 11pt; }
+      .reader-doc__head { padding: 12px 14px; }
+      .reader-nav { padding: 10px 14px 14px; flex-wrap: wrap; }
+      .reader-nav__btn { font-size: 12px; padding: 8px 14px; }
+    }
+
+    body.a11y .reader-error { color: #ffe600 !important; }
+    body.a11y .reader-error button { background: #ffe600 !important; color: #000 !important; }
+    body.theme-dark .reader-error { color: #ff8a8a; }
+    body.a11y .sidebar { background: #000 !important; border-color: #ffe600 !important; }
+    body.a11y .sidebar__title { color: #ffe600 !important; }
+    body.a11y .sidebar__search input { background: #000 !important; color: #ffe600 !important; border-color: #ffe600 !important; }
+    body.a11y .lec-group__label { color: #ffe600 !important; }
+    body.a11y .lec-item a { color: #ffe600 !important; }
+    body.a11y .lec-item a:hover { background: #ffe600 !important; color: #000 !important; }
+    body.a11y .lec-item a.is-active { background: #ffe600 !important; color: #000 !important; }
+    body.a11y .lec-item__num { background: #000 !important; color: #ffe600 !important; border: 1px solid #ffe600; }
+    body.a11y .lec-item a.is-active .lec-item__num { background: #000 !important; color: #ffe600 !important; }
+    body.a11y .sidebar__toggle { background: #000 !important; border-color: #ffe600 !important; color: #ffe600 !important; }
+    body.a11y .reader-welcome h2 { color: #ffe600 !important; }
+    body.a11y .reader-welcome p { color: #ffe600 !important; }
+
+    .doc-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .pdf-frame {
+      display: block;
+      width: 100%;
+      height: 72vh;
+      min-height: 480px;
+      border: none;
+      background: #525659;
+    }
+    .pdf-frame[hidden] { display: none; }
+    .reader-doc__content[hidden] { display: none; }
+    body.a11y .pdf-frame { border: 3px solid #ffe600; }
+    @media (max-width: 860px) {
+      .pdf-frame { height: 60vh; min-height: 380px; }
+      .doc-actions { width: 100%; }
+    }
+
+    .reader-doc.doc-view { display: block; }
+    .reader-doc.doc-view[hidden] { display: none; }
+    .note-loading {
+      padding: 16px 20px;
+      font-size: 15px;
+      color: var(--muted);
+    }
+    .reader-welcome[hidden] { display: none; }
+
+    .doc-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 16px; border-radius: 9px; border: 1.5px solid var(--paper-line);
+      background: var(--paper-soft); color: var(--paper-ink);
+      font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none;
+      transition: background .2s, border-color .2s;
+    }
+    .doc-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+    .doc-btn--accent { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .doc-btn--accent:hover { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
+    body.a11y .doc-btn { background: #000; color: #ffe600; border-color: #ffe600; }
+    body.a11y .doc-btn--accent { background: #ffe600; color: #000; }
+</style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header__inner">
+      <a class="brand" href="index.html" aria-label="На главную страницу">
+        <img class="brand__logo brand__logo--img" src="img/logo-pgktit.png" alt="" aria-hidden="true">
+        <h1 class="brand__text">
+          <span class="brand__badge">ЭУМК</span>
+          <span class="brand__title">«Веб-программирование на&nbsp;стороне&nbsp;сервера»</span>
+          <span class="brand__subtitle">Электронный учебно-методический комплекс</span>
+        </h1>
+      </a>
+      <div class="toolbar">
+        <button class="tool-btn tool-btn--a11y" type="button" id="a11y-toggle" aria-pressed="false" title="Версия для слабовидящих">
+          <span class="tool-btn__ico tool-btn__ico--eye" aria-hidden="true"></span>
+          <span class="tool-btn__txt">Для слабовидящих</span>
+        </button>
+        <button class="tool-btn tool-btn--theme" type="button" id="theme-toggle" aria-pressed="false" title="Переключить тему" aria-label="Переключить тему">
+          <span class="tool-btn__ico tool-btn__ico--moon" aria-hidden="true"></span>
+        </button>
+        <div class="search-anchor">
+          <button class="tool-btn tool-btn--search" type="button" id="search-toggle" title="Поиск" aria-label="Поиск" aria-expanded="false" aria-controls="search-popover">
+            <span class="tool-btn__ico tool-btn__ico--search" aria-hidden="true"></span>
+          </button>
+          <div class="search-popover" id="search-popover" hidden role="search" aria-label="Поиск по курсу">
+            <button type="button" class="search-box__close" id="search-close" aria-label="Закрыть поиск">✕</button>
+            <div class="search-box__field">
+              <svg class="search-box__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>
+              <input type="search" id="site-search" class="search-box__input" placeholder="Поиск…" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="search-results" aria-autocomplete="list" aria-label="Поиск по названиям лекций, лабораторных и контрольной работы">
+              <button type="button" class="search-box__clear" id="search-clear" aria-label="Очистить поиск" hidden>×</button>
+            </div>
+            <p class="search-box__hint">Лекции, лабораторные и контрольная — по названиям.</p>
+            <p class="search-status" id="search-status" role="status" aria-live="polite"></p>
+            <div class="search-results" id="search-results" role="listbox" aria-label="Результаты поиска" hidden></div>
+          </div>
+        </div>
+      </div>
+      <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav">
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+      </button>
+    </div>
+    <div class="container header__nav">
+      <nav class="nav" id="main-nav" aria-label="Основное меню">
+        <ul class="nav__list">
+          <li><a class="nav__link nav__link--active" href="note-reader.html">Пояснительная записка</a></li>
+          <li><a class="nav__link" href="index.html">Главная</a></li>
+          <li><a class="nav__link" href="theory-reader.html">Теоретический раздел</a></li>
+          <li><a class="nav__link" href="practice-reader.html">Практический раздел</a></li>
+          <li><a class="nav__link" href="control-reader.html">Раздел контроля</a></li>
+          <li><a class="nav__link" href="extra-reader.html">Вспомогательные материалы</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="reader-layout">
+
+      <aside class="sidebar" id="sidebar" aria-label="Пояснительная записка">
+        <div class="sidebar__head">
+          <span class="sidebar__title">Пояснительная записка</span>
+          <button class="sidebar__toggle" id="sidebar-close" title="Скрыть панель" aria-label="Скрыть панель">←</button>
+        </div>
+        <div class="sidebar__search">
+          <input type="search" id="lec-search" placeholder="Поиск документа…" aria-label="Поиск документа">
+        </div>
+        <div class="sidebar__list" id="sidebar-list">
+
+          <span class="lec-group__label">Документы пояснительной записки</span>
+          <ul class="lec-group__list">
+            <li class="lec-item"><a href="#" data-doc="0"><span class="lec-item__num">1</span>Титульный лист</a></li>
+            <li class="lec-item"><a href="#" data-doc="1"><span class="lec-item__num">2</span>Пояснительная записка</a></li>
+          </ul>
+
+      </aside>
+
+      <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+      <button class="sidebar-open-btn" id="sidebar-open-btn" title="Открыть список лекций" aria-label="Открыть список лекций">Список</button>
+
+      <div class="reader-main" id="reader-main">
+
+        <div class="reader-welcome" id="reader-welcome">
+          <h2>Материалы курса</h2>
+          <p>Официальные документы и программа по дисциплине «Веб-программирование на стороне сервера». Выберите документ в списке слева.</p>
+        </div>
+
+        <div class="reader-error" id="reader-error">
+          <p id="reader-error-msg">Не удалось загрузить документ.</p>
+        </div>
+
+          <div class="reader-doc doc-view" id="doc-view" hidden>
+          <div class="reader-doc__head">
+            <div>
+              <div class="reader-doc__title" id="doc-title">—</div>
+              <div class="reader-doc__meta" id="doc-meta">Документ</div>
+            </div>
+            <div class="doc-actions">
+              <a class="doc-btn doc-btn--accent" id="btn-download" href="#" download>Скачать</a>
+              <a class="doc-btn" id="btn-open-newtab" href="#" target="_blank" rel="noopener">Открыть в новой вкладке</a>
+            </div>
+          </div>
+          <iframe class="pdf-frame" id="pdf-frame" title="Просмотр документа" hidden></iframe>
+          <div class="reader-doc__content" id="docx-content" hidden></div>
+          <div class="reader-nav">
+            <button class="reader-nav__btn" id="btn-prev">← Предыдущий</button>
+            <span class="reader-nav__info" id="nav-info"></span>
+            <button class="reader-nav__btn" id="btn-next">Следующий →</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__inner">
+      <span class="footer__badge">ЭУМК</span>
+      <p class="footer__text">Электронный учебно-методический комплекс «Веб-программирование на стороне сервера»</p>
+    </div>
+  </footer>
+
+  <script src="js/search.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/vendor/mammoth.browser.min.js"></script>
+  <script src="js/docx-postprocess.js"></script>
+  <script>
+    (function () {
+      var DOCS = [
+        { num: 1, file: 'Титульный лист.pdf',      title: 'Титульный лист',      type: 'pdf' },
+        { num: 2, file: 'ПОЯСНИТЕЛЬНАЯ ЗАПИСКА.docx', title: 'Пояснительная записка', type: 'docx' }
+      ];
+      var FOLDER = 'файлы%20пояснительной/';
+
+      var sidebar        = document.getElementById('sidebar');
+      var sidebarClose   = document.getElementById('sidebar-close');
+      var sidebarOpenBtn = document.getElementById('sidebar-open-btn');
+      var sidebarOverlay = document.getElementById('sidebar-overlay');
+      var searchInput    = document.getElementById('lec-search');
+      var sidebarList    = document.getElementById('sidebar-list');
+
+      var welcome   = document.getElementById('reader-welcome');
+      var errorEl   = document.getElementById('reader-error');
+      var errorMsg  = document.getElementById('reader-error-msg');
+      var docView   = document.getElementById('doc-view');
+      var docTitle  = document.getElementById('doc-title');
+      var docMeta   = document.getElementById('doc-meta');
+      var pdfFrame  = document.getElementById('pdf-frame');
+      var docxContent = document.getElementById('docx-content');
+      var btnDl     = document.getElementById('btn-download');
+      var btnNewTab = document.getElementById('btn-open-newtab');
+      var btnPrev   = document.getElementById('btn-prev');
+      var btnNext   = document.getElementById('btn-next');
+      var navInfo   = document.getElementById('nav-info');
+
+      var headerEl = document.querySelector('.site-header');
+      function syncHeaderH() {
+        if (!headerEl) return;
+        document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
+      }
+      syncHeaderH();
+      window.addEventListener('resize', syncHeaderH);
+
+      var currentIdx = -1;
+
+      function hideAll() {
+        if (welcome) { welcome.setAttribute('hidden', ''); }
+        docView.hidden = true;
+        errorEl.classList.remove('is-visible');
+      }
+
+      sidebarClose.addEventListener('click', function () {
+        sidebar.classList.add('is-collapsed');
+        sidebarOpenBtn.classList.add('is-visible');
+      });
+      sidebarOpenBtn.addEventListener('click', function () {
+        sidebar.classList.remove('is-collapsed');
+        sidebar.classList.add('is-open');
+        sidebarOpenBtn.classList.remove('is-visible');
+        sidebarOverlay.classList.add('is-visible');
+      });
+      sidebarOverlay.addEventListener('click', closeMobileSidebar);
+      function closeMobileSidebar() {
+        sidebar.classList.remove('is-open');
+        sidebarOverlay.classList.remove('is-visible');
+      }
+
+      searchInput.addEventListener('input', function () {
+        var q = this.value.trim().toLowerCase();
+        var items = sidebarList.querySelectorAll('.lec-item');
+        items.forEach(function (li) {
+          var text = li.textContent.toLowerCase();
+          li.style.display = (!q || text.indexOf(q) !== -1) ? '' : 'none';
+        });
+      });
+
+      sidebarList.addEventListener('click', function (e) {
+        var link = e.target.closest('[data-doc]');
+        if (!link) return;
+        e.preventDefault();
+        startDoc(parseInt(link.getAttribute('data-doc'), 10));
+        closeMobileSidebar();
+      });
+
+      function b64ToArrayBuffer(b64) {
+        var bin = atob(b64);
+        var len = bin.length;
+        var bytes = new Uint8Array(len);
+        for (var i = 0; i < len; i++) bytes[i] = bin.charCodeAt(i);
+        return bytes.buffer;
+      }
+
+      function loadDocx(file) {
+        docxContent.innerHTML = '<p class="note-loading">Загрузка документа…</p>';
+        docxContent.hidden = false;
+        fetch(FOLDER + encodeURIComponent(file))
+          .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
+          .then(function (buf) {
+            return mammoth.convertToHtml({ arrayBuffer: buf });
+          })
+          .then(function (result) {
+            docxContent.innerHTML = window.fixVariantTables(result.value);
+            docxContent.scrollTop = 0;
+          })
+          .catch(function () {
+            docxContent.innerHTML = '<p class="note-loading">Не удалось отобразить документ. Используйте кнопку «Открыть в новой вкладке» или «Скачать».</p>';
+          });
+      }
+
+      function startDoc(idx) {
+        if (idx < 0 || idx >= DOCS.length) return;
+        currentIdx = idx;
+        var doc = DOCS[idx];
+        var href = FOLDER + encodeURIComponent(doc.file);
+
+        hideAll();
+        docView.hidden = false;
+        docTitle.textContent = '«' + doc.title + '»';
+        if (doc.type === 'pdf') {
+          pdfFrame.hidden = false;
+          docxContent.hidden = true;
+          docxContent.innerHTML = '';
+          docMeta.textContent  = 'Файл: ' + doc.file + ' · PDF';
+          pdfFrame.src = href;
+          pdfFrame.title = 'Просмотр: ' + doc.title;
+        } else {
+          pdfFrame.hidden = true;
+          pdfFrame.removeAttribute('src');
+          docMeta.textContent  = 'Файл: ' + doc.file + ' · DOCX';
+          loadDocx(doc.file);
+        }
+        btnDl.href = href;
+        btnDl.setAttribute('download', doc.file);
+        btnNewTab.href = href;
+        updateNav(idx);
+        window.scrollTo(0, 0);
+
+        history.replaceState(null, '', '#doc-' + idx);
+        sidebarList.querySelectorAll('[data-doc]').forEach(function (a) {
+          a.classList.toggle('is-active', parseInt(a.getAttribute('data-doc'), 10) === idx);
+        });
+      }
+
+      function updateNav(idx) {
+        navInfo.textContent = (idx + 1) + ' / ' + DOCS.length;
+        if (idx <= 0) btnPrev.setAttribute('data-disabled', '1');
+        else btnPrev.removeAttribute('data-disabled');
+        if (idx >= DOCS.length - 1) btnNext.setAttribute('data-disabled', '1');
+        else btnNext.removeAttribute('data-disabled');
+      }
+
+      btnPrev.addEventListener('click', function () { if (currentIdx > 0) startDoc(currentIdx - 1); });
+      btnNext.addEventListener('click', function () { if (currentIdx < DOCS.length - 1) startDoc(currentIdx + 1); });
+
+      var hash = window.location.hash;
+      var m = hash.match(/^#doc-(\d+)$/);
+      if (m) {
+        var idx = parseInt(m[1], 10);
+        if (idx >= 0 && idx < DOCS.length) startDoc(idx);
+      }
+    })();
+</script>
+</body>
+</html>

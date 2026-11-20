@@ -37,7 +37,7 @@
 
   function searchable(d) {
     if (!d.sl) {
-      var extra = d.s === 'practice' ? ' лр' : (d.s === 'control' ? ' кр' : (d.s === 'extra' ? ' материалы' : ' лекция'));
+      var extra = d.s === 'practice' ? ' лр' : (d.s === 'control' ? ' кр' : (d.s === 'extra' ? ' материалы' : (d.s === 'note' ? ' пояснительная' : ' лекция')));
       d.sl = (d.t + ' ' + d.n + extra + ' №' + d.n).toLowerCase();
     }
     return d.sl;
@@ -47,6 +47,7 @@
     if (d.s === 'theory') return 'theory-reader.html#lec-' + d.i;
     if (d.s === 'practice') return 'practice-reader.html#lec-' + d.i;
     if (d.s === 'extra') return 'extra-reader.html#doc-' + d.i;
+    if (d.s === 'note') return 'note-reader.html#doc-' + d.i;
     return 'control-reader.html#exam';
   }
 
@@ -54,6 +55,7 @@
     if (s === 'theory') return 'Теория';
     if (s === 'practice') return 'Лабораторные';
     if (s === 'extra') return 'Материалы';
+    if (s === 'note') return 'Пояснительная';
     return 'Контроль';
   }
 
@@ -61,6 +63,7 @@
     if (s === 'theory') return 'badge-theory';
     if (s === 'practice') return 'badge-practice';
     if (s === 'extra') return 'badge-extra';
+    if (s === 'note') return 'badge-note';
     return 'badge-control';
   }
 
